@@ -211,35 +211,41 @@ certificatesResolvers:
 ```
 
 ### Instalação Archivemática
+O [Archivematica](https://www.archivematica.org/pt-br/) é um aplicativo de código aberto baseado na Web e em padrões que permite à sua instituição preservar o acesso de longo prazo a conteúdo digital confiável, autêntico e seguro.
 
-git clone https://github.com/artefactual/archivematica.git --recurse-submodules
-cd archivematica
-git checkout v1.18.0
-git pull origin v1.18.0 
-Caso não tenha feito o git clone com o parâmetro: --recurse-submodules
-git pull origin v1.18.0 --rebase 
-git submodule update --init --recursive
+Baixar o código da plataforma git
+- [ ] git clone https://github.com/artefactual/archivematica.git --recurse-submodules
 
-Para o elasticsearch container:
-sudo sysctl -w vm.max_map_count=262144
-abrir arquivo e colocar conteúdo na última linha
-nano /etc/sysctl.conf
-vm.max_map_count=262144
-acessar a pasta cd /opt/archivematica/hack
-criar as imagens:
-docker compose build
+Fazer a conferência de versão para garantir a compatibilidade
+- [ ] cd archivematica
+- [ ] git checkout v1.18.0
+- [ ] git pull origin v1.18.0 
+
+Caso não tenha feito o git clone com o parâmetro: --recurse-submodules é possível adequar a versão 
+- [ ] git pull origin v1.18.0 --rebase 
+- [ ] git submodule update --init --recursive
+
+Para o [elasticsearch container](https://www.elastic.co/docs/deploy-manage/deploy/self-managed/install-elasticsearch-with-docker), é necessário ajustar um parâmetro de memória:
+- [ ] sudo sysctl -w vm.max_map_count=262144
+
+Para que o ajuste de memória seja reconhecido na inicialização, colocar conteúdo na última linha
+- [ ] nano /etc/sysctl.conf
+- [ ] vm.max_map_count=262144
+
 Criar volumes na máquina:
-mkdir -p /mnt/rdcarq/transfer
-mkdir -p /mnt/rdcarq/transfer-sistema
-mkdir -p /mnt/rdcarq/repositorio
-mkdir -p /mnt/rdcarq/repositorio/aip
-mkdir -p /mnt/rdcarq/repositorio/dip
-mkdir -p /mnt/rdcarq/repositorio/backlog
-crea
-brir o Web EditorCriar uma nova Stach: archivematica
-A
+- [ ] mkdir -p /mnt/rdcarq/transfer
+- [ ] mkdir -p /mnt/rdcarq/transfer-sistema
+- [ ] mkdir -p /mnt/rdcarq/repositorio
+- [ ] mkdir -p /mnt/rdcarq/repositorio/aip
+- [ ] mkdir -p /mnt/rdcarq/repositorio/dip
+- [ ] mkdir -p /mnt/rdcarq/repositorio/backlog
 
+acessar a pasta cd /opt/archivematica/hack e criar as imagens:
+- [ ] docker compose build
 
+Abrir o Web EditorCriar uma nova Stach: archivematica
+
+```
 services:
   mysql:
     image: "percona:8.0"
@@ -426,10 +432,11 @@ services:
       - default
       - traefik
 
-  # git clone https://github.com/artefactual/archivematica.git --branch qa/1.x --recurse-submodules
-  # atualizar após o git clone executado: 
-  # git submodule update --init --recursive     # Inicializar submódulos que porventura não existam (primeira vez)
-  # git submodule update --recursive            # Mover os submódulos para os commits exatos referenciados
+    # git clone https://github.com/artefactual/archivematica.git --branch qa/1.x --recurse-submodules
+    # atualizar após o git clone executado: 
+    # git submodule update --init --recursive     # Inicializar submódulos que porventura não existam (primeira vez)
+    # git submodule update --recursive            # Mover os submódulos para os commits exatos referenciados
+  
   archivematica-storage-service:
     image: am-archivematica-storage-service:latest
     pull_policy: never
@@ -489,7 +496,6 @@ networks:
       name: integracao
 
 volumes:
-
   # Internal named volumes.
   # These are not accessible outside of the docker host and are maintained by
   # Docker.
@@ -505,26 +511,29 @@ volumes:
   archivematica_pipeline_data:
     name: "am-pipeline-data"
     external: true
+```
 
+Acessar o container do Mysql e criar o banco `MCP` e `SS`
+- [ ] mysql -u root -p”12345”
+- [ ] create database MCP;
+- [ ] create database SS;
+      CREATE USER 'archivematica'@'%' IDENTIFIED BY 'demo';
+      GRANT ALL PRIVILEGES ON `MCP`.* TO 'archivematica'@'%';
+      GRANT ALL PRIVILEGES ON `SS`.*  TO 'archivematica'@'%';
 
-
-Acessar a conteiner do Mysql
-mysql -u root -p”12345”
-create database MCP;
-create database SS;
-CREATE USER 'archivematica'@'%' IDENTIFIED BY 'demo';
-GRANT ALL PRIVILEGES ON `MCP`.* TO 'archivematica'@'%';
-GRANT ALL PRIVILEGES ON `SS`.*  TO 'archivematica'@'%';
 Criar banco de dados do painel Dashboard
 Acessar o conteiner do dashboard
 acessar o diretório do dashboard
-cd /src/src/archivematica/dashboard
+- [ ] cd /src/src/archivematica/dashboard
+
 comando:
-./manage.py migrate 
+- [ ] ./manage.py migrate 
 Criar dados banco de dados do Storage Service
 criar conteiner provisório
 
+Levantar o serviço archivemática
 
+```
 docker run -it --rm \
   --network archivematica_default \
   -e FORWARDED_ALLOW_IPS="*" \
@@ -537,15 +546,15 @@ docker run -it --rm \
   -e SS_PROMETHEUS_ENABLED="true" \
   --entrypoint sh \
   am-archivematica-storage-service
-
+```
 
 	
 criar dados de banco de dados SS
 comando:
-./manage.py migrate
+- [ ] ./manage.py migrate
 
 Criar usuário do Storage Service
-cd /src/src/archivematica/storage_service
-./manage.py createsuperuser
+- [ ] cd /src/src/archivematica/storage_service
+- [ ] ./manage.py createsuperuser
 
 
