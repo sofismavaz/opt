@@ -5,16 +5,18 @@ Para instalar o [Docker](https://www.digitalocean.com/community/tutorials/how-to
 
 Permissões de acesso para execução das ações do Docker
 - [ ] getent group docker
-- [ ] sudo usermod -a -G docker lucirvaz
+- [ ] sudo usermod -a -G docker ${USER}
 - [ ] newgrp docker
 
 ### Instação do Portainer
 O [Portainer 2.33.0 LTS](https://docs.portainer.io/start/install-ce/server/docker/linux), trás todos os novos recursos das versões anteriores do STS, incluindo um novo visual, Helm, atualização do Edge e melhorias no mTLS, além de um novo recurso de alerta experimental.
 
-A instalação dos módulos *Docker* são instalados no diretório das aplicações:   **/opt**
-- [ ] mkdir portainer
-- [ ] cd /portainer
+Será necessário criar a conexão de rede para que a o serviço da imagem Docker possa trafegar os dados.
 - [ ] docker network create traefik
+
+A instalação dos módulos *Docker* são instalados no diretório das aplicações:   **/opt**
+- [ ] mkdir -p portainer/data
+- [ ] cd /portainer
 - [ ] nano compose.yaml
 
 Colar conteúdo abaixo no arquivo (docker compose)
@@ -43,16 +45,17 @@ volumes:
   portainer_data:
 ```
 
+Levantar o serviço portainer.io
+- [ ] docker compose up -d
+- [ ] acessar o endereço: http://localhost:9000
 
+A primeira vez que o serviço portainer.io é iniciado, a aplicação exige a criação de um usuário administrador, e nesta versão ficou definido que:
+> usuário: admin
+> senha: Eleições2025.
 
+Uma vez disponível o serviço traefik, adicionar ao compose as linhas de adicionar as labels no compose do portainer
 
-
-docker compose up -d
-acessar o endereço: http://localhost:9000
-
-Após a instalação do traefik, adicionar as labels no compose do portainer
-
-
+```
 version: "3.9"
 
 services:
@@ -64,13 +67,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     labels:
-     traefik.enable: "true"
+      traefik.enable: "true"
       traefik.docker.network: "traefik"
-
       traefik.http.routers.portainer.rule: "Host(`portainer.tre-ac.jus.br`)"
       traefik.http.routers.portainer.entrypoints: "web"          # HTTP (80)
       # NADA de tls.* aqui
-
       traefik.http.routers.portainer.service: "portainer"
       traefik.http.services.portainer.loadbalancer.server.port: "9000"
       # (opcional) middlewares só se você quiser; evite middleware de redirecionamento p/ HTTPS
@@ -85,20 +86,32 @@ networks:
 
 volumes:
   portainer_data:
+```
+
+Reiniciar o serviço 
+- [ ] docker compose up -d
 
 
+### Instalação do Traefik
 
+Com a ferramenta portainer.io, você pode adicionar uma stack traefik, usando o ==Web Editor== e inserindo as linhas de código a seguir. Essa ação cria um arquivo traefik.yaml no diretório *opt/traefik*
 
+Criar a árvore de diretórios: 
+- [ ] mkdir -p opt/traefik/acme  
+- [ ] mkdir -p opt/traefik/config  
+- [ ] mkdir -p opt/traefik/dynamic  
+- [ ] mkdir -p opt/traefik/letsencrypt  
+- [ ] mkdir -p opt/traefik/logs
 
-docker compose up -d
+Criar arquivos:
+- [ ] touch opt/traefik/acme/acme.json
+- [ ] touch opt/traefik/dynamic/dynamic.yml
+- [ ] touch opt/traefik/traefik.yml
 
+Alterar arquivo: 
+nano opt/traefik/traefik.yml
 
-INSTALAÇÃO DO TRAEFIK
-
-Adicionar uma stack
-Em Web Editor adicionar o seguinte docker compose
-
-
+```
 services:
   traefik:
     image: traefik:v3.5
@@ -121,20 +134,8 @@ services:
 networks:
   traefik:
     external: true
+```
 
-
-Criar diretórios:
-mkdir -p /opt/traefik/acme  
-mkdir -p /opt/traefik/config  
-mkdir -p /opt/traefik/dynamic  
-mkdir -p /opt/traefik/letsencrypt  
-mkdir -p /opt/traefik/logs
-Criar arquivos:
-touch /opt/traefik/acme/acme.json
-touch /opt/traefik/dynamic/dynamic.yml
-touch /opt/traefik/traefik.yml
-Alterar arquivo: 
-nano /opt/traefik/traefik.yml
 
 api:
   dashboard: true
