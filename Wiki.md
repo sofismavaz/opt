@@ -19,7 +19,7 @@ A instalação dos módulos *Docker* são instalados no diretório das aplicaç�
 - [ ] cd /portainer
 - [ ] nano compose.yaml
 
-Colar conteúdo abaixo no arquivo (docker compose)
+Colar conteúdo a seguir ao arquivo compose.yaml
 
 ```
 version: "3.9"
@@ -53,7 +53,7 @@ A primeira vez que o serviço portainer.io é iniciado, a aplicação exige a cr
 > usuário: admin
 > senha: Eleições2025.
 
-Uma vez disponível o serviço traefik, adicionar ao compose as linhas de adicionar as labels no compose do portainer
+Uma vez disponível o serviço traefik, adicionar as linhas de labels ao compose.yaml do portainer
 
 ```
 version: "3.9"
@@ -94,7 +94,7 @@ Reiniciar o serviço
 
 ### Instalação do Traefik
 
-Com a ferramenta portainer.io, você pode adicionar uma stack traefik, usando o ==Web Editor== e inserindo as linhas de código a seguir. Essa ação cria um arquivo traefik.yaml no diretório *opt/traefik*
+Com a ferramenta portainer.io, você pode adicionar uma stack traefik, usando o ==Web Editor== e inserindo as linhas de código a seguir. Essa ação cria o arquivo compose.yaml no diretório *opt/traefik*
 
 Criar a árvore de diretórios: 
 - [ ] mkdir -p opt/traefik/acme  
@@ -107,9 +107,6 @@ Criar arquivos:
 - [ ] touch opt/traefik/acme/acme.json
 - [ ] touch opt/traefik/dynamic/dynamic.yml
 - [ ] touch opt/traefik/traefik.yml
-
-Alterar arquivo: 
-nano opt/traefik/traefik.yml
 
 ```
 services:
@@ -136,7 +133,10 @@ networks:
     external: true
 ```
 
+Incluir as linhas de código a seguir ao arquivo traefik.yml: 
+- [ ] nano opt/traefik/traefik.yml
 
+```
 api:
   dashboard: true
   insecure: true
@@ -183,13 +183,12 @@ log:
 accessLog:
   filePath: "/var/log/traefik/access.log"
   format: json
-
-
+```
 
 Alterar arquivo: 
-nano /opt/traefik/dynamic/dynamic.yml
+- [ ] nano /opt/traefik/dynamic/dynamic.yml
 
-
+```
 entryPoints:
   web:
     address: ":80"
@@ -209,11 +208,9 @@ certificatesResolvers:
       storage: "/acme/acme.json"   # persista em volume
       httpChallenge:
         entryPoint: web            # desafio pela porta 80
+```
 
-
-
-
-INSTALAR ARCHIVEMATICA
+### Instalação Archivemática
 
 git clone https://github.com/artefactual/archivematica.git --recurse-submodules
 cd archivematica
