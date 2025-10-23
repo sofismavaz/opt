@@ -258,6 +258,55 @@ Caso não tenha feito o git clone com o parâmetro: --recurse-submodules é poss
 - [ ] git pull origin v1.18.0 --rebase 
 - [ ] git submodule update --init --recursive
 
+Criação dos volumes
+- [ ] cd ./archivematica/hack
+- [ ] make create-volumes
+- [ ] make build
+
+Subir os containeres
+- [ ] docker compose up -d
+
+Instalação das bases de dados
+- [ ] sudo make bootstrap
+- [ ] make restart-am-services
+
+### Instalação do AtoM DOCKER COMPOSE
+- [ ] Baixar pacote:
+- [ ] cd /opt
+- [ ] git clone -b qa/2.x https://github.com/artefactual/atom.git atom
+- [ ] cd atom
+- [ ] git checkout v2.10.0
+- [ ] git pull origin v2.10.0
+
+Criar conteineres
+- [ ] cd /opt/atom/docker
+- [ ] docker compose -f docker-compose.dev.yml up -d
+
+Inicializar banco de dados
+- [ ] docker compose exec atom php -d memory_limit=-1 symfony tools:purge --demo
+
+Compilar os temas
+- [ ] docker compose exec atom npm install
+- [ ] docker compose exec atom npm run build
+
+Reiniciar o atom_worker
+- [ ] docker compose restart atom_worker
+
+Testar
+- [ ] http://localhost:63001 ou http://10.168.122.6:63001
+```shell
+Username: demo@example.com
+Password: demo
+GRANT ALL PRIVILEGES ON MCP.* TO 'archivematica'@'%';
+
+cd /src/src/archivematica/dashboard
+./manage.py migrate --noinput
+```
+Senha de acesso a aplicação do banco
+```shell
+senha: #Atom12345
+```
+
 Para o [elasticsearch container](https://www.elastic.co/docs/deploy-manage/deploy/self-managed/install-elasticsearch-with-docker), é necessário ajustar um parâmetro de memória:
 - [ ] sudo sysctl -w vm.max_map_count=262144
 
@@ -556,18 +605,18 @@ Acessar o container do Mysql e criar o banco `MCP` e `SS`
       GRANT ALL PRIVILEGES ON `SS`.*  TO 'archivematica'@'%';
 
 Criar banco de dados do painel Dashboard
-Acessar o conteiner do dashboard
-acessar o diretório do dashboard
-- [ ] cd /src/src/archivematica/dashboard
+- [ ] Acessar o conteiner do dashboard
+- [ ] acessar o diretório do dashboard
 
-comando:
-- [ ] ./manage.py migrate 
-Criar dados banco de dados do Storage Service
-criar conteiner provisório
-
-Levantar o serviço archivemática
-
+```shell
+cd /src/src/archivematica/dashboard
+./manage.py migrate
 ```
+
+- [ ] Criar dados banco de dados do Storage Service
+  - [ ] Criar conteiner provisório
+
+```shell
 docker run -it --rm \
   --network archivematica_default \
   -e FORWARDED_ALLOW_IPS="*" \
@@ -582,23 +631,15 @@ docker run -it --rm \
   am-archivematica-storage-service
 ```
 
-	
-criar dados de banco de dados SS
-comando:
-- [ ] ./manage.py migrate
-
-Criar usuário do Storage Service
-- [ ] cd /src/src/archivematica/storage_service
-- [ ] ./manage.py createsuperuser
-
-
+- [ ] Criar usuário do Storage Service
 ```shell
+cd /src/src/archivematica/storage_service
+./manage.py createsuperuser
 ```
-
+- [ ] Abrir o contêiner do Storage Service e criar usuário e senha do storage service
 ```shell
-```
-
-```shell
+cd /src/src/archivematica/storage_service
+./manage.py createsuperuser
 ```
 
 ```shell
