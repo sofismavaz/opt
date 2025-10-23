@@ -1,12 +1,58 @@
 ### Instalação do Docker
 Para instalar o [Docker](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04), com sucesso será necessário  atender aos requisitos gerais do sistema.
-> [!NOTE]
-> Os aplicativos a serem instalados estão compatíveis com a versão Ubuntu 24.04 LTS.
+
+- [ ] sudo apt remove docker docker-engine docker.io containerd runc
+- [ ] sudo apt update
+- [ ] sudo apt install -y ca-certificates curl gnupg lsb-release
+- [ ] sudo install -m 0755 -d /etc/apt/keyrings
+- [ ] curl -fsSL https://download.docker.com/linux/ubuntu/gpg | - [ ] sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+- [ ] sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+Inserir Repositório de instalação:
+
+```shell
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+Instala versão padrão do aplicativo *Docker*
+- [ ] sudo apt update
+- [ ] sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 Permissões de acesso para execução das ações do Docker
+- [ ] sudo groupadd docker
 - [ ] getent group docker
 - [ ] sudo usermod -a -G docker ${USER}
 - [ ] newgrp docker
+- [ ] sudo systemctl enable docker
+- [ ] sudo systemctl status docker
+
+> :warning: Atenção
+>
+> Os aplicativos a serem instalados estão compatíveis com a versão Ubuntu 24.04 LTS.
+
+```shell
+```
+
+```shell
+```
+
+```shell
+```
+
+```shell
+```
+
+
+
+Adicionar o endereço de IP aos serviços DNS
+```shell
+10.168.122.6	portainer.tre-ac.jus.br		# porta:9200	## Gestor de imagens Docker
+10.168.122.6	archivematica.tre-ac.jus.br	# porta:8080 	## Gestor de preservação
+10.168.122.6	storage.tre-ac.jus.br		# porta:8081 	## Gestor de armazenamento 
+```
 
 ### Instação do Portainer
 O [Portainer 2.33.0 LTS](https://docs.portainer.io/start/install-ce/server/docker/linux), trás todos os novos recursos das versões anteriores do STS, incluindo um novo visual, Helm, atualização do Edge e melhorias no mTLS, além de um novo recurso de alerta experimental.
@@ -22,8 +68,6 @@ A instalação dos módulos *Docker* são instalados no diretório das aplicaç�
 Colar conteúdo a seguir ao arquivo compose.yaml
 
 ```
-version: "3.9"
-
 services:
   portainer:
     image: portainer/portainer-ce:latest
@@ -56,8 +100,6 @@ A primeira vez que o serviço portainer.io é iniciado, a aplicação exige a cr
 Uma vez disponível o serviço traefik, adicionar as linhas de labels ao compose.yaml do portainer
 
 ```
-version: "3.9"
-
 services:
   portainer:
     image: portainer/portainer-ce:latest
@@ -94,7 +136,7 @@ Reiniciar o serviço
 
 ### Instalação do Traefik
 
-Com a ferramenta portainer.io, você pode adicionar uma stack traefik, usando o ==Web Editor== e inserindo as linhas de código a seguir. Essa ação cria o arquivo compose.yaml no diretório *opt/traefik*
+Com a ferramenta portainer.io, você pode adicionar uma stack traefik, usando o *Web Editor* e inserindo as linhas de código a seguir. Essa ação cria o arquivo compose.yaml no diretório *opt/traefik*
 
 Criar a árvore de diretórios: 
 - [ ] mkdir -p opt/traefik/acme  
@@ -256,7 +298,7 @@ services:
       MYSQL_USER: "archivematica"
       MYSQL_PASSWORD: "demo"
     volumes:
-      - "./etc/mysql/tuning.cnf:/etc/my.cnf.d/tuning.cnf:ro"
+      - "/etc/mysql/tuning.cnf:/etc/my.cnf.d/tuning.cnf:ro"
       - "mysql_data:/var/lib/mysql"
     expose:
       - "3306"
@@ -282,7 +324,6 @@ services:
         soft: -1
         hard: -1
     healthcheck:
-          healthcheck:
       test: [
         "CMD-SHELL",
         "curl -fsSL http://localhost:9200/_cat/health?h=status | grep -q -E 'green|yellow'",
@@ -304,6 +345,8 @@ services:
     user: "gearman"
     expose:
       - "4730"
+    networks:
+      - default
 
   clamavd:
     image: "artefactual/clamav:latest"
@@ -333,7 +376,6 @@ services:
       ARCHIVEMATICA_MCPSERVER_MCPSERVER_PROMETHEUS_BIND_PORT: "7999"
       ARCHIVEMATICA_MCPSERVER_MCPSERVER_PROMETHEUS_BIND_ADDRESS: "0.0.0.0"
     volumes:
-      #- "/opt/archivematica/:/src"
       - "archivematica_pipeline_data:/var/archivematica/sharedDirectory:rw"
     links:
       - "mysql"
@@ -366,7 +408,6 @@ services:
       METADATA_XML_VALIDATION_SETTINGS_FILE: "/src/hack/submodules/archivematica-sampledata/xml-validation/xml_validation.py"
       XML_CATALOG_FILES: "/src/hack/submodules/archivematica-sampledata/xml-validation/catalog.xml"
     volumes:
-      #- "/opt/archivematica/:/src"
       - "/opt/archivematica/chaves:/home/archivematica/.ssh/"
       - "archivematica_pipeline_data:/var/archivematica/sharedDirectory:rw"
     links:
@@ -397,12 +438,13 @@ services:
       ARCHIVEMATICA_DASHBOARD_CLIENT_DATABASE: "MCP"
       ARCHIVEMATICA_DASHBOARD_SEARCH_ENABLED: "${AM_SEARCH_ENABLED:-true}"
     volumes:
-      #- "/opt/archivematica/:/src"
       - "archivematica_pipeline_data:/var/archivematica/sharedDirectory:rw"
     depends_on:
       elasticsearch:
         condition: service_healthy
         restart: true
+    ports:
+      - "8080:8000"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
@@ -417,7 +459,6 @@ services:
       - "traefik.http.services.dashboard.loadbalancer.server.port=8000"
       - "traefik.http.routers.dashboard.middlewares=dashboard-sec"
       - "traefik.http.routers.dashboard.tls.options=secure@file"
-
 
       # Segurança
       - "traefik.http.middlewares.dashboard-sec.headers.stsSeconds=63072000"
@@ -450,7 +491,6 @@ services:
       SS_GNUPG_HOME_PATH: "/var/archivematica/storage_service/.gnupg"
       SS_PROMETHEUS_ENABLED: "true"
     volumes:
-      #- "/opt/archivematica/hack/submodules/archivematica-storage-service/:/src/"
       - "/opt/archivematica/hack/submodules/archivematica-sampledata/:/home/archivematica/archivematica-sampledata/:ro"
       - "archivematica_pipeline_data:/var/archivematica/sharedDirectory:rw"
       - "archivematica_storage_service_staging_data:/var/archivematica/storage_service:rw"
@@ -460,12 +500,15 @@ services:
       # - cadeia de custódia - documentos autênticos
       - "/mnt/rdcarq/transfer-sistema/:/transfer-sistema:rw"
       - "/mnt/rdcarq/repositorio/:/rdcarq:rw"
+    ports:
+      - "8081:8000"
+
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
 
       # HTTP -> redirect para HTTPS (middleware definido no dynamic.yml do Traefik)
-      - "traefik.http.routers.storage-http.rule=Host(`storage.dev.pyta.com.br`)"
+      - "traefik.http.routers.storage-http.rule=Host(`storage.tre-ac.jus.br`)"
       - "traefik.http.routers.storage-http.entrypoints=websecure"
       - "traefik.http.routers.storage-http.tls=true"
 

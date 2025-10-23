@@ -1,22 +1,28 @@
 services:
-  traefik:
-    image: traefik:v3.5
-    container_name: traefik
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.portainer.rule: "Host(`portainer.tre-ac.jus.br`)"
+      traefik.http.routers.portainer.entrypoints: "web"          # HTTP (80)
+      # NADA de tls.* aqui
+      traefik.http.routers.portainer.service: "portainer"
+      traefik.http.services.portainer.loadbalancer.server.port: "9000"
+      # (opcional) middlewares só se você quiser; evite middleware de redirecionamento p/ HTTPS
     networks:
       - traefik
-    environment:
-      - TRAEFIK_GLOBAL_SENDANONYMOUSUSAGE=true
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /opt/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - /opt/traefik/dynamic:/etc/traefik/dynamic:ro
-      - /opt/traefik/acme:/etc/traefik/acme
-      - /opt/traefik/logs:/var/log/traefik
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
 networks:
   traefik:
     external: true
+
+volumes:
+  portainer_data:
