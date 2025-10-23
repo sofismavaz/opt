@@ -253,6 +253,9 @@ certificatesResolvers:
 ```
 
 ### Instalação Archivemática
+
+Usar o [Manual Archivemática](https://github.com/artefactual/archivematica/blob/qa/1.x/hack/README.md)
+
 O [Archivematica](https://www.archivematica.org/pt-br/) é um aplicativo de código aberto baseado na Web e em padrões que permite à sua instituição preservar o acesso de longo prazo a conteúdo digital confiável, autêntico e seguro.
 
 Baixar o código da plataforma git
