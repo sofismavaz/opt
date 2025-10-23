@@ -33,18 +33,6 @@ Permissões de acesso para execução das ações do Docker
 >
 > Os aplicativos a serem instalados estão compatíveis com a versão Ubuntu 24.04 LTS.
 
-```shell
-```
-
-```shell
-```
-
-```shell
-```
-
-```shell
-```
-
 
 
 Adicionar o endereço de IP aos serviços DNS
@@ -95,7 +83,7 @@ Levantar o serviço portainer.io
 
 A primeira vez que o serviço portainer.io é iniciado, a aplicação exige a criação de um usuário administrador, e nesta versão ficou definido que:
 > usuário: admin
-> senha: Eleições2025.
+> senha: Eleições2026.
 
 Uma vez disponível o serviço traefik, adicionar as linhas de labels ao compose.yaml do portainer
 
@@ -603,4 +591,16 @@ Criar usuário do Storage Service
 - [ ] cd /src/src/archivematica/storage_service
 - [ ] ./manage.py createsuperuser
 
+
+```shell
+```
+
+```shell
+```
+
+```shell
+```
+
+```shell
+```
 
