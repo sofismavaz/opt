@@ -5,7 +5,7 @@ Para instalar o [Docker](https://www.digitalocean.com/community/tutorials/how-to
 - [ ] sudo apt update
 - [ ] sudo apt install -y ca-certificates curl gnupg lsb-release
 - [ ] sudo install -m 0755 -d /etc/apt/keyrings
-- [ ] curl -fsSL https://download.docker.com/linux/ubuntu/gpg | - [ ] sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+- [ ] curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 - [ ] sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
 Inserir Repositório de instalação:
@@ -32,8 +32,13 @@ Permissões de acesso para execução das ações do Docker
 > :warning: Atenção
 >
 > Os aplicativos a serem instalados estão compatíveis com a versão Ubuntu 24.04 LTS.
+> 
+> Avaliar se a versão do sistema destina a porta :80 a outra aplicação, para que não haja conflito com o *archivematica* 
 
 
+```shell
+sudo systemctl status apache2 
+```
 
 Adicionar o endereço de IP aos serviços DNS
 ```shell
@@ -85,7 +90,7 @@ A primeira vez que o serviço portainer.io é iniciado, a aplicação exige a cr
 > usuário: admin
 > senha: Eleições2026.
 
-Uma vez disponível o serviço traefik, adicionar as linhas de labels ao compose.yaml do portainer
+Uma vez disponível o serviço *traefik*, adicionar as linhas de labels ao compose.yaml do portainer
 
 ```
 services:
@@ -94,7 +99,7 @@ services:
     container_name: portainer
     command: -H unix:///var/run/docker.sock
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     labels:
       traefik.enable: "true"
@@ -133,10 +138,21 @@ Criar a árvore de diretórios:
 - [ ] mkdir -p opt/traefik/letsencrypt  
 - [ ] mkdir -p opt/traefik/logs
 
+```shell
+mkdir -p opt/traefik/acme opt/traefik/config opt/traefik/dynamic opt/traefik/letsencrypt opt/traefik/logs
+```
+
 Criar arquivos:
 - [ ] touch opt/traefik/acme/acme.json
 - [ ] touch opt/traefik/dynamic/dynamic.yml
 - [ ] touch opt/traefik/traefik.yml
+
+```shell
+touch opt/traefik/acme/acme.json opt/traefik/dynamic/dynamic.yml opt/traefik/traefik.yml
+```
+---
+Criar o arquivo *compose.yaml* no diretório *traefik* com as linhas a seguir:
+- [ ] nano opt/traefik/compose.yaml
 
 ```
 services:
@@ -152,18 +168,20 @@ services:
     environment:
       - TRAEFIK_GLOBAL_SENDANONYMOUSUSAGE=true
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /opt/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - /opt/traefik/dynamic:/etc/traefik/dynamic:ro
-      - /opt/traefik/acme:/etc/traefik/acme
-      - /opt/traefik/logs:/var/log/traefik
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./var/run/docker.sock:/var/run/docker.sock:ro
+      - ./opt/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./opt/traefik/dynamic:/etc/traefik/dynamic:ro
+      - ./opt/traefik/acme:/etc/traefik/acme
+      - ./opt/traefik/logs:/var/log/traefik
+      - ./etc/letsencrypt:/etc/letsencrypt:ro
 networks:
   traefik:
     external: true
 ```
 
-Incluir as linhas de código a seguir ao arquivo traefik.yml: 
+---
+
+Criar o arquivo *traefik.yml* no diretório *traefik* com as linhas de código a seguir: 
 - [ ] nano opt/traefik/traefik.yml
 
 ```
@@ -191,7 +209,7 @@ providers:
     exposedByDefault: false
     network: traefik
   file:
-    directory: "/etc/traefik/dynamic"
+    directory: "etc/traefik/dynamic"
     watch: true
 
 tls:
@@ -211,7 +229,7 @@ log:
   level: INFO
 
 accessLog:
-  filePath: "/var/log/traefik/access.log"
+  filePath: "./var/log/traefik/access.log"
   format: json
 ```
 
@@ -234,8 +252,8 @@ entryPoints:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: "suporte@tre-ac.jus.br"
-      storage: "/acme/acme.json"   # persista em volume
+      email: "serede@tre-ac.jus.br"
+      storage: "./acme/acme.json"   # persista em volume
       httpChallenge:
         entryPoint: web            # desafio pela porta 80
 ```
