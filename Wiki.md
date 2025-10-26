@@ -168,12 +168,12 @@ services:
     environment:
       - TRAEFIK_GLOBAL_SENDANONYMOUSUSAGE=true
     volumes:
-      - ./var/run/docker.sock:/var/run/docker.sock:ro
-      - ./opt/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./opt/traefik/dynamic:/etc/traefik/dynamic:ro
-      - ./opt/traefik/acme:/etc/traefik/acme
-      - ./opt/traefik/logs:/var/log/traefik
-      - ./etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /opt/traefik/dynamic:/etc/traefik/dynamic:ro
+      - /opt/traefik/acme:/etc/traefik/acme
+      - /opt/traefik/logs:/var/log/traefik
+      - /etc/letsencrypt:/etc/letsencrypt:ro
 networks:
   traefik:
     external: true
