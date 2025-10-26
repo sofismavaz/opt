@@ -4,29 +4,36 @@
 # Script para criar a estrutura de diretórios e arquivos iniciais da instalação do Portainer e Traefik
 # Autor: Lucir Vaz 
 # Data: 2024-06-27
+# Versão: 1.0
 
-# sudo 
+# Instruções iniciais
+# Este script deverá ser executado após a instalação e configuração da aplicação Docker
+# Criará a estrutura de pastas e configuração de arquivos necessária para o uso do Portainer e Traefik.
+
+# Limpar o arquivo de log anterior
+> logInstalacao.txt
+
 # Criar pastas Portainer
-mkdir -p /opt/portainer/data > logInstalacao.txt 2>&1
+mkdir -p /opt/portainer/data >> logInstalacao.txt 2>&1
 echo "Pasta portainer criados." >> logInstalacao.txt
 
 # Criar arquivos de configuração do Portainer
-touch /opt/portainer/docker-compose.yml > logInstalacao.txt 2>&1
-echo "Arquivo docker-compose.yml criado." >> logInstalacao.txt
+touch /opt/portainer/compose.yaml >> logInstalacao.txt 2>&1
+echo "Arquivo docker-compose.yaml criado." >> logInstalacao.txt
 
-cat <<EOL > /opt/portainer/compose.yaml 2> logInstalacao.txt
+cat <<EOL > /opt/portainer/compose.yaml 2>> logInstalacao.txt
 services:
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
     command: -H unix:///var/run/docker.sock
     volumes:
-      - ./var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     labels:
       traefik.enable: "true"
       traefik.docker.network: "traefik"
-      traefik.http.routers.portainer.rule: "Host(`portainer.tre-ac.jus.br`)"
+      traefik.http.routers.portainer.rule: "Host(\`portainer.tre-ac.jus.br\`)"
       traefik.http.routers.portainer.entrypoints: "web"          # HTTP (80)
       # NADA de tls.* aqui
       traefik.http.routers.portainer.service: "portainer"
@@ -48,11 +55,11 @@ echo "Arquivo compose portainer criado." >> logInstalacao.txt
 
 # Criar diretórios principais
 #mkdir -p /opt/traefik/{acme,config,dynamic,letsencrypt,logs} > /dev/null 2>&1
-mkdir -p /opt/traefik/{acme,config,dynamic,letsencrypt,logs} > logInstalacao.txt 2>&1
-echo "Diretórios da estrutura de tráfego rede." > logInstalacao.txt
+mkdir -p /opt/traefik/{acme,config,dynamic,letsencrypt,logs} >> logInstalacao.txt 2>&1
+echo "Diretórios da estrutura de tráfego rede." >> logInstalacao.txt
 
 # Criar arquivo de configuração inicial
-touch /opt/traefik/acme/acme.json /opt/traefik/dynamic/dynamic.yml /opt/traefik/traefik.yml /opt/traefik/compose.yaml > logInstalacao.txt 2>&
+touch /opt/traefik/acme/acme.json /opt/traefik/dynamic/dynamic.yml /opt/traefik/traefik.yml /opt/traefik/compose.yaml >> logInstalacao.txt
 echo "Arquivos de configuração inicial criados." >> logInstalacao.txt
 
 # Adicionar conteúdo ao arquivo traefik.yml
@@ -101,7 +108,7 @@ log:
   level: INFO
 
 accessLog:
-  filePath: "./var/log/traefik/access.log"
+  filePath: "/var/log/traefik/access.log"
   format: json
 EOL
 echo "Conteúdo adicionado ao arquivo traefik.yml." >> logInstalacao.txt
@@ -157,6 +164,8 @@ networks:
 EOL
 
 # Definir permissões
-chmod 600 /opt/traefik/acme/acme.json > logInstalacao.txt 2>&1
-echo "Permissões definidas para acme.json." >> logInstalacao.txt
+chmod -R 755 /opt/traefik /opt/portainer >> logInstalacao.txt 2>&1
+chgrp -R docker /opt/traefik /opt/portainer >> logInstalacao.txt 2>&1
+chmod 600 /opt/traefik/acme/acme.json >> logInstalacao.txt 2>&1
+echo "Permissões de acesso e execução definidas." >> logInstalacao.txt
 
