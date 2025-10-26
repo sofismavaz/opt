@@ -8,6 +8,11 @@
 # Instruções iniciais
 # Este Menu chamará os Scripts de preparação do emabiente de instalação das aplicações Docker
 
+#
+pasta=${PWD}
+
+while true; do
+echo "----------------------------------------"
 echo "Menu de Instalação de Aplicações Docker"
 echo "1 - Instalar Docker"
 echo "2 - Instalar Portainer e Traefik"
@@ -19,23 +24,23 @@ read -p "Escolha uma opção (1-6): " opcao
 case $opcao in
     1)
         echo "Iniciando a instalação do Docker Compose..."
-        bash /opt/installDocker.sh
+        bash /$pasta/installDocker.sh
         ;;
     2)
         echo "Iniciando a instalação do Portainer e Traefik..."
-        bash /opt/installPortainerTraefik.sh
+        bash /$pasta/installPortainerTraefik.sh
         ;;
     3)
         echo "Inicianndo a instalação do Archivemática..."
-        bash /opt/installArchivematica.sh
+        bash /$pasta/installArchivematica.sh
         ;;
     4)
         echo "Iniciando a instalação do AtoM..."
-        bash /opt/installAtoM.sh
+        bash /$pasta/installAtoM.sh
         ;;
     5)
         echo "Iniciando a configuração do Docker EntryPoint..."
-        bash /opt/dockerEntrypoint.sh
+        bash /$pasta/dockerEntrypoint.sh
         ;;
     6)
         echo "Saindo do menu de instalação."
@@ -45,5 +50,7 @@ case $opcao in
         echo "Opção inválida. Por favor, escolha uma opção entre 1 e 5."
         ;;
 esac
+
+done    
 
 echo "Instalação concluída."

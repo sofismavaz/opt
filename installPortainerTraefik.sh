@@ -13,7 +13,7 @@
 > logInstallPortTraefik.txt
 
 # Criar pastas Portainer
-mkdir -p /opt/portainer/data >> logInstallPortTraefik.txt 2>&1
+sudo mkdir -p /opt/portainer/data >> logInstallPortTraefik.txt 2>&1
 echo "Pasta portainer criados." >> logInstallPortTraefik.txt
 
 # Criar arquivos de configuração do Portainer
@@ -53,7 +53,7 @@ EOL
 echo "Arquivo compose portainer criado." >> logInstallPortTraefik.txt
 
 # Criar diretórios principais
-mkdir -p /opt/traefik/{acme,config,dynamic,letsencrypt,logs} >> logInstallPortTraefik.txt 2>&1
+sudo mkdir -p /opt/traefik/{acme,config,dynamic,letsencrypt,logs} >> logInstallPortTraefik.txt 2>&1
 echo "Diretórios da estrutura de tráfego rede." >> logInstallPortTraefik.txt
 
 # Criar arquivo de configuração inicial
@@ -162,16 +162,16 @@ networks:
 EOL
 
 # Criar volumes de processamento dos pacotes AIP, DIP, Backlog e Transferência
-mkdir -p /mnt/rdcarq/transfer /mnt/transfer-sistema /mnt/rdcarq/repositorio/{aip,dip,backlog} >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-mkdir -p /opt/rsync >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-mkdir -p /mnt/integracao >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-mkdir -p /mnt/atom/{uploads,downloads,config,plugins} >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+sudo mkdir -p /mnt/rdcarq/transfer /mnt/transfer-sistema /mnt/rdcarq/repositorio/{aip,dip,backlog} >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+sudo mkdir -p /opt/rsync >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+sudo mkdir -p /mnt/integracao >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+sudo mkdir -p /mnt/atom/{uploads,downloads,config,plugins} >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
 echo "Volumes de processamento criados." >> logInstallPortTraefik.txt
 
 # Definir permissões
-chmod -R 755 /opt/traefik /opt/portainer /mnt/rdcarq >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-chgrp -R docker /opt/traefik /opt/portainer /mnt/rdcarq /mnt/integracao /mnt/atom /opt/rsync >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-chmod 600 /opt/traefik/acme/acme.json >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+sudo chmod -R 755 /opt/traefik /opt/portainer /mnt/rdcarq >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+sudo chgrp -R docker /opt/traefik /opt/portainer /mnt/rdcarq /mnt/integracao /mnt/atom /opt/rsync >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+sudo chmod 600 /opt/traefik/acme/acme.json >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
 echo "Permissões de acesso e execução definidas." >> logInstallPortTraefik.txt
 
 

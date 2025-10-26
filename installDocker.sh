@@ -9,39 +9,22 @@
 # Este script deverá ser o primeiro a ser executado para preparação do ambiente Docker
 # Instalará o Docker e Docker Compose na máquina.
 
-# Limpar o arquivo de log anterior
-> logInstallDocker.txt
-
-# Preparação do sistema para instalação do Docker
-sudo apt remove docker docker-engine docker.io containerd runc
-sudo apt update
-sudo apt install -y ca-certificates curl gnupg lsb-release
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-# Adicionar repositório do Docker
-echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list >> logInstallDocker.txt 2>&1
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >> logInstallDocker.txt 2>&1
-echo "Docker e Docker Compose instalados." >> logInstallDocker.txt
-
-# Verificar instalação
-docker --version >> logInstallDocker.txt 2>&1
-docker compose version >> logInstallDocker.txt 2>&1
-echo "Verificação de instalação concluída." >> logInstallDocker.txt 2>&1
-echo "Instalação do Docker e Docker Compose concluída com sucesso." >> logInstallDocker.txt
-
 # Adicionar usuário ao grupo docker
-sudo usermod -aG docker $USER >> logInstallDocker.txt 2>&1
+sudo usermod -aG docker $USER >> logInstallDocker.txt
 echo "Usuário adicionado ao grupo docker." >> logInstallDocker.txt
 
 # Mudar grupo principal do usuário para docker
-sudo usermod -g docker $USER >> logInstallDocker.txt 2>&1
+sudo usermod -g docker $USER >> logInstallDocker.txt
 newgrp docker
 echo "Grupo principal do usuário alterado para docker." >> logInstallDocker.txt
 sudo systemctl enable docker
 sudo systemctl status docker
 echo "Serviço Docker habilitado para iniciar com o sistema." >> logInstallDocker.txt
+
+# Verificar instalação
+docker --version >> logInstallDocker.txt
+docker compose version >> logInstallDocker.txt
+echo "Verificação de instalação concluída." >> logInstallDocker.txt
+echo "Instalação do Docker e Docker Compose concluída com sucesso." >> logInstallDocker.txt
 
 # Fim do Script
