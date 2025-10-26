@@ -1,3 +1,26 @@
+### Instalação automatizada
+
+Será possível executar a configuração e instalação dos aplicativos de forma automatizada ou passo-a-passo, seguindo o roteiro a seguir.
+
+#### Para a Configuração Automatizada
+Os scrips de configuração e instalação estão disponíveis no servidor git e será possível executá-los na pasta */opt* 
+
+```shell
+sudo git clone https://github.com/sofismavaz/opt.git /opt
+```
+
+A estrutura de execução lhe oferece um menu com diretivas de configuração e instalação das aplicações:
+
+Menu de Instalação de Aplicações Docker
+0. Instalar Docker
+1. Preparar o ambiente para uso do Docker
+2. Instalar Portainer e Traefik
+3. Instalar Archivemática
+4. Instalar AtoM
+5. Instalar Docker EntryPoint
+6. Sair
+Escolha uma opção (0-6):
+
 ### Instalação do Docker
 Para instalar o [Docker](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04), com sucesso será necessário  atender aos requisitos gerais do sistema.
 

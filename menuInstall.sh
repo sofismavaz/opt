@@ -9,38 +9,83 @@
 # Este Menu chamará os Scripts de preparação do emabiente de instalação das aplicações Docker
 
 #
-pasta=${PWD}
+clear
+echo "Bem-vindo ao Menu de Instalação de Aplicações da Plataforma RDC-Arquivo Digital usando Docker!" 2>${pasta}/logInstallDocker.txt
+echo "Por favor, escolha a pasta onde os scripts serão baixados (pressione Enter para usar a pasta atual):" 2>${pasta}/logInstallDocker.txt
+read -p "Em que pasta você gostaria de baixar os Scripts de Instalação?"
+pasta=$REPLY
+
+if [ ! -z {$pasta} ]; then
+    echo "A pasta ${pasta} não existe,... criando agora..." 2>${pasta}/logInstallDocker.txt
+    pasta="${PWD}/aval"
+    mkdir -p "$pasta" || { echo "Falha ao criar a pasta ${pasta}. Verifique as permissões."; exit 1; }
+fi
+
+# Clonar o repositório contendo os scripts de instalação na pasta indicada
+echo "Usando a pasta indicada para baixar os scripts." 2>${pasta}/logInstallDocker.txt
+sudo git clone https://github.com/sofismavaz/opt.git $pasta
+
+# verifica se os scripts necessários estão presentes
+if [ ! -f /$pasta/installDocker.sh ]; then
+    echo "Script installDocker.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    exit 1
+fi
+if [ ! -f /$pasta/preparaSODocker.sh ]; then
+    echo "Script preparaSODocker.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    exit 1
+fi
+if [ ! -f /$pasta/installPortainerTraefik.sh ]; then
+    echo "Script installPortainerTraefik.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    exit 1
+fi
+if [ ! -f /$pasta/installArchivematica.sh ]; then
+    echo "Script installArchivematica.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    exit 1
+fi
+if [ ! -f /$pasta/installAtoM.sh ]; then
+    echo "Script installAtoM.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    exit 1
+fi
+if [ ! -f /$pasta/dockerEntrypoint.sh ]; then
+    echo "Script dockerEntrypoint.sh não encontrado em /$pasta. Por favor, verifique."
+    exit 1
+fi
 
 while true; do
 echo "----------------------------------------"
 echo "Menu de Instalação de Aplicações Docker"
-echo "1 - Instalar Docker"
+echo "0 - Instalar Docker"
+echo "1 - Preparar o ambiente para uso do Docker"
 echo "2 - Instalar Portainer e Traefik"
 echo "3 - Instalar Archivemática"
 echo "4 - Instalar AtoM"
 echo "5 - Instalar Docker EntryPoint"
 echo "6 - Sair"
-read -p "Escolha uma opção (1-6): " opcao
+read -p "Escolha uma opção (0-6): " opcao
 case $opcao in
-    1)
+    0)
         echo "Iniciando a instalação do Docker Compose..."
         bash /$pasta/installDocker.sh
         ;;
+    1)
+        echo "Preparando ambiente de uso do Docker Compose..."
+        bash /$pasta/installDocker.sh  2>${pasta}/logInstallDocker.txt
+        ;;
     2)
         echo "Iniciando a instalação do Portainer e Traefik..."
-        bash /$pasta/installPortainerTraefik.sh
+        bash /$pasta/installPortainerTraefik.sh 2>${pasta}/logInstallDocker.txt
         ;;
     3)
         echo "Inicianndo a instalação do Archivemática..."
-        bash /$pasta/installArchivematica.sh
+        bash /$pasta/installArchivematica.sh 2>${pasta}/logInstallDocker.txt
         ;;
     4)
         echo "Iniciando a instalação do AtoM..."
-        bash /$pasta/installAtoM.sh
+        bash /$pasta/installAtoM.sh 2>${pasta}/logInstallDocker.txt
         ;;
     5)
         echo "Iniciando a configuração do Docker EntryPoint..."
-        bash /$pasta/dockerEntrypoint.sh
+        bash /$pasta/dockerEntrypoint.sh 2>${pasta}/logInstallDocker.txt
         ;;
     6)
         echo "Saindo do menu de instalação."
@@ -53,4 +98,4 @@ esac
 
 done    
 
-echo "Instalação concluída."
+echo "Instalação concluída." >>${pasta}/logInstallDocker.txt
