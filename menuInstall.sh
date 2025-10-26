@@ -7,13 +7,15 @@
 #
 # Instruções iniciais
 # Este Menu chamará os Scripts de preparação do emabiente de instalação das aplicações Docker
+
 echo "Menu de Instalação de Aplicações Docker"
 echo "1 - Instalar Docker"
 echo "2 - Instalar Portainer e Traefik"
 echo "3 - Instalar Archivemática"
 echo "4 - Instalar AtoM"
-echo "5 - Sair"
-read -p "Escolha uma opção (1-4): " opcao
+echo "5 - Instalar Docker EntryPoint"
+echo "6 - Sair"
+read -p "Escolha uma opção (1-6): " opcao
 case $opcao in
     1)
         echo "Iniciando a instalação do Docker Compose..."
@@ -32,6 +34,10 @@ case $opcao in
         bash /opt/installAtoM.sh
         ;;
     5)
+        echo "Iniciando a configuração do Docker EntryPoint..."
+        bash /opt/dockerEntrypoint.sh
+        ;;
+    6)
         echo "Saindo do menu de instalação."
         exit 0
         ;;

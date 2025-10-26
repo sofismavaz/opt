@@ -170,7 +170,7 @@ echo "Volumes de processamento criados." >> logInstallPortTraefik.txt
 
 # Definir permissões
 chmod -R 755 /opt/traefik /opt/portainer /mnt/rdcarq >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-chgrp -R docker /opt/traefik /opt/portainer /mnt/rdcarq /mnt/integracao /mnt/atom >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+chgrp -R docker /opt/traefik /opt/portainer /mnt/rdcarq /mnt/integracao /mnt/atom /opt/rsync >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
 chmod 600 /opt/traefik/acme/acme.json >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
 echo "Permissões de acesso e execução definidas." >> logInstallPortTraefik.txt
 

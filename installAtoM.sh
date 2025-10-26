@@ -124,7 +124,6 @@ services:
       - "9200"
     networks:
       - default
-
   :
     image: percona:8.0
     environment:
@@ -188,7 +187,6 @@ networks:
   integracao:
     external:
       name: integracao
-
 EOL
 
 # Criar conteineres

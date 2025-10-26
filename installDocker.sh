@@ -40,7 +40,6 @@ echo "Usuário adicionado ao grupo docker." >> logInstallDocker.txt
 sudo usermod -g docker $USER >> logInstallDocker.txt 2>&1
 newgrp docker
 echo "Grupo principal do usuário alterado para docker." >> logInstallDocker.txt
-
 sudo systemctl enable docker
 sudo systemctl status docker
 echo "Serviço Docker habilitado para iniciar com o sistema." >> logInstallDocker.txt
