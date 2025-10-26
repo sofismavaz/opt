@@ -161,8 +161,17 @@ networks:
     external: true
 EOL
 
+# Criar volumes de processamento dos pacotes AIP, DIP, Backlog e Transferência
+mkdir -p /mnt/rdcarq/transfer /mnt/transfer-sistema /mnt/rdcarq/repositorio/{aip,dip,backlog} >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+mkdir -p /opt/rsync >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+mkdir -p /mnt/integracao >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+mkdir -p /mnt/atom/{uploads,downloads,config,plugins} >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+echo "Volumes de processamento criados." >> logInstallPortTraefik.txt
+
 # Definir permissões
-chmod -R 755 /opt/traefik /opt/portainer >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-chgrp -R docker /opt/traefik /opt/portainer >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+chmod -R 755 /opt/traefik /opt/portainer /mnt/rdcarq >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
+chgrp -R docker /opt/traefik /opt/portainer /mnt/rdcarq /mnt/integracao /mnt/atom >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
 chmod 600 /opt/traefik/acme/acme.json >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
 echo "Permissões de acesso e execução definidas." >> logInstallPortTraefik.txt
+
+

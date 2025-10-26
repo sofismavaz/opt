@@ -25,9 +25,6 @@ echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker
 sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >> logInstallDocker.txt 2>&1
 echo "Docker e Docker Compose instalados." >> logInstallDocker.txt
-# Adicionar usuário ao grupo docker
-sudo usermod -aG docker $USER >> logInstallDocker.txt 2>&1
-echo "Usuário adicionado ao grupo docker." >> logInstallDocker.txt
 
 # Verificar instalação
 docker --version >> logInstallDocker.txt 2>&1
@@ -35,4 +32,17 @@ docker compose version >> logInstallDocker.txt 2>&1
 echo "Verificação de instalação concluída." >> logInstallDocker.txt 2>&1
 echo "Instalação do Docker e Docker Compose concluída com sucesso." >> logInstallDocker.txt
 
+# Adicionar usuário ao grupo docker
+sudo usermod -aG docker $USER >> logInstallDocker.txt 2>&1
+echo "Usuário adicionado ao grupo docker." >> logInstallDocker.txt
 
+# Mudar grupo principal do usuário para docker
+sudo usermod -g docker $USER >> logInstallDocker.txt 2>&1
+newgrp docker
+echo "Grupo principal do usuário alterado para docker." >> logInstallDocker.txt
+
+sudo systemctl enable docker
+sudo systemctl status docker
+echo "Serviço Docker habilitado para iniciar com o sistema." >> logInstallDocker.txt
+
+# Fim do Script

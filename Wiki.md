@@ -348,7 +348,7 @@ Abrir o Web EditorCriar uma nova Stach: archivematica
 ```
 services:
   mysql:
-    image: "percona:8.0"
+    image: "percona/percona-server:8.0.43-34"
     command: "--character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci"
     environment:
       MYSQL_ROOT_PASSWORD: "12345"
@@ -356,7 +356,7 @@ services:
       MYSQL_USER: "archivematica"
       MYSQL_PASSWORD: "demo"
     volumes:
-      - "/etc/mysql/tuning.cnf:/etc/my.cnf.d/tuning.cnf:ro"
+      - "./etc/mysql/tuning.cnf:/etc/my.cnf.d/tuning.cnf:ro"
       - "mysql_data:/var/lib/mysql"
     expose:
       - "3306"
@@ -396,9 +396,9 @@ services:
       - "9200"
     networks:
       - default
-
+      
   gearmand:
-    image: "artefactual/gearmand:1.1.18-alpine"
+    image: "artefactual/gearmand:1.1.22-alpine"
     command: "--queue-type=builtin"
     user: "gearman"
     expose:
@@ -407,7 +407,7 @@ services:
       - default
 
   clamavd:
-    image: "artefactual/clamav:latest"
+    image: "clamav/clamav-debian:1.4.3-57"
     environment:
       CLAMAV_MAX_FILE_SIZE: "42"
       CLAMAV_MAX_SCAN_SIZE: "42"
@@ -446,7 +446,7 @@ services:
     pull_policy: never
     environment:
       DJANGO_SECRET_KEY: "12345"
-      DJANGO_SETTINGS_MODULE: "archivematica.MCPClient.settings.common"
+      DJANGO_SETTINGS_MODULE: "archivematica.MCPClient.settings.common"           
       ARCHIVEMATICA_MCPCLIENT_CLIENT_USER: "archivematica"
       ARCHIVEMATICA_MCPCLIENT_CLIENT_PASSWORD: "demo"
       ARCHIVEMATICA_MCPCLIENT_CLIENT_HOST: "mysql"
@@ -463,8 +463,7 @@ services:
       ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_PROMETHEUS_BIND_PORT: "7999"
       ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_PROMETHEUS_BIND_ADDRESS: "0.0.0.0"
       ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_METADATA_XML_VALIDATION_ENABLED: "true"
-      METADATA_XML_VALIDATION_SETTINGS_FILE: "/src/hack/submodules/archivematica-sampledata/xml-validation/xml_validation.py"
-      XML_CATALOG_FILES: "/src/hack/submodules/archivematica-sampledata/xml-validation/catalog.xml"
+      #METADATA_XML_VALIDATION_SETTINGS_FILE: "/src/hack/submodules/archivematica-sampledata/xml-validation/xml_validation.py"
     volumes:
       - "/opt/archivematica/chaves:/home/archivematica/.ssh/"
       - "archivematica_pipeline_data:/var/archivematica/sharedDirectory:rw"
@@ -486,7 +485,7 @@ services:
       AM_GUNICORN_ACCESSLOG: "/dev/null"
       AM_GUNICORN_RELOAD: "true"
       AM_GUNICORN_RELOAD_ENGINE: "auto"
-      DJANGO_SETTINGS_MODULE: "settings.local"
+      DJANGO_SETTINGS_MODULE: "archivematica.dashboard.settings.local"
       ARCHIVEMATICA_DASHBOARD_DASHBOARD_GEARMAN_SERVER: "gearmand:4730"
       ARCHIVEMATICA_DASHBOARD_DASHBOARD_ELASTICSEARCH_SERVER: "http://elasticsearch:9200"
       ARCHIVEMATICA_DASHBOARD_DASHBOARD_PROMETHEUS_ENABLED: "1"
@@ -495,20 +494,20 @@ services:
       ARCHIVEMATICA_DASHBOARD_CLIENT_HOST: "mysql"
       ARCHIVEMATICA_DASHBOARD_CLIENT_DATABASE: "MCP"
       ARCHIVEMATICA_DASHBOARD_SEARCH_ENABLED: "${AM_SEARCH_ENABLED:-true}"
+      ARCHIVEMATICA_DASHBOARD_DASHBOARD_SESSION_COOKIE_SECURE: "false"
+      ARCHIVEMATICA_DASHBOARD_DASHBOARD_CSRF_COOKIE_SECURE: "false"
     volumes:
       - "archivematica_pipeline_data:/var/archivematica/sharedDirectory:rw"
     depends_on:
       elasticsearch:
         condition: service_healthy
         restart: true
-    ports:
-      - "8080:8000"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
 
       # HTTP -> redirect para HTTPS (middleware definido no dynamic.yml do Traefik)
-      - "traefik.http.routers.dashboard-http.rule=Host(`archivematica.tre-ac.jus.br`)"
+      - "traefik.http.routers.dashboard-http.rule=Host(`archivematica.tre-ac.com.br`)"
       - "traefik.http.routers.dashboard-http.entrypoints=websecure"
       - "traefik.http.routers.dashboard-http.tls=true"
 
@@ -517,6 +516,7 @@ services:
       - "traefik.http.services.dashboard.loadbalancer.server.port=8000"
       - "traefik.http.routers.dashboard.middlewares=dashboard-sec"
       - "traefik.http.routers.dashboard.tls.options=secure@file"
+
 
       # Segurança
       - "traefik.http.middlewares.dashboard-sec.headers.stsSeconds=63072000"
@@ -531,23 +531,24 @@ services:
       - default
       - traefik
 
-    # git clone https://github.com/artefactual/archivematica.git --branch qa/1.x --recurse-submodules
-    # atualizar após o git clone executado: 
-    # git submodule update --init --recursive     # Inicializar submódulos que porventura não existam (primeira vez)
-    # git submodule update --recursive            # Mover os submódulos para os commits exatos referenciados
-  
+  # git clone https://github.com/artefactual/archivematica.git --branch qa/1.x --recurse-submodules
+  # atualizar após o git clone executado: 
+  # git submodule update --init --recursive     # Inicializar submódulos que porventura não existam (primeira vez)
+  # git submodule update --recursive            # Mover os submódulos para os commits exatos referenciados
   archivematica-storage-service:
     image: am-archivematica-storage-service:latest
     pull_policy: never
     environment:
       FORWARDED_ALLOW_IPS: "*"
       SS_GUNICORN_ACCESSLOG: "/dev/null"
-      SS_GUNICORN_RELOAD: "true"
-      SS_GUNICORN_RELOAD_ENGINE: "auto"
-      DJANGO_SETTINGS_MODULE: "storage_service.settings.local"
+      SS_GUNICORN_RELOAD: "${SS_GUNICORN_RELOAD:-false}"
+      DJANGO_SETTINGS_MODULE: "archivematica.storage_service.storage_service.settings.local"
+      #SS_GUNICORN_RELOAD_ENGINE: "auto"
       SS_DB_URL: "mysql://archivematica:demo@mysql/SS"
-      SS_GNUPG_HOME_PATH: "/var/archivematica/storage_service/.gnupg"
       SS_PROMETHEUS_ENABLED: "true"
+      #SS_GNUPG_HOME_PATH: "/var/archivematica/storage_service/.gnupg"
+      SESSION_COOKIE_SECURE: "false"
+      CSRF_COOKIE_SECURE: "false"
     volumes:
       - "/opt/archivematica/hack/submodules/archivematica-sampledata/:/home/archivematica/archivematica-sampledata/:ro"
       - "archivematica_pipeline_data:/var/archivematica/sharedDirectory:rw"
@@ -558,15 +559,12 @@ services:
       # - cadeia de custódia - documentos autênticos
       - "/mnt/rdcarq/transfer-sistema/:/transfer-sistema:rw"
       - "/mnt/rdcarq/repositorio/:/rdcarq:rw"
-    ports:
-      - "8081:8000"
-
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
 
       # HTTP -> redirect para HTTPS (middleware definido no dynamic.yml do Traefik)
-      - "traefik.http.routers.storage-http.rule=Host(`storage.tre-ac.jus.br`)"
+      - "traefik.http.routers.storage-http.rule=Host(`storage.tre-ac.com.br`)"
       - "traefik.http.routers.storage-http.entrypoints=websecure"
       - "traefik.http.routers.storage-http.tls=true"
 
