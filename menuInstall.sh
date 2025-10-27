@@ -7,23 +7,27 @@
 #
 # Instruções iniciais
 # Este Menu chamará os Scripts de preparação do emabiente de instalação das aplicações Docker
-
 #
+# pasta padrão onde os arquivos serão gravados caso não seja indicada outra
+padrao="${HOME}/rdcarqInstall"
+
 clear
-echo "Bem-vindo ao Menu de Instalação de Aplicações da Plataforma RDC-Arquivo Digital usando Docker!" 2>${pasta}/logInstallDocker.txt
-echo "Por favor, escolha a pasta onde os scripts serão baixados (pressione Enter para usar a pasta atual):" 2>${pasta}/logInstallDocker.txt
-read -p "Em que pasta você gostaria de baixar os Scripts de Instalação?"
+echo "Bem-vindo ao Menu de Instalação da Plataforma RDC-Arq usando Docker!"
+echo "Por favor, escolha a pasta onde os scripts serão baixados (pressione Enter para usar a pasta ${padrao}):"
+read -p "Em que pasta você gostaria de baixar os Scripts de Instalação?  "
 pasta=$REPLY
 
 if [ ! -z {$pasta} ]; then
-    echo "A pasta ${pasta} não existe,... criando agora..." 2>${pasta}/logInstallDocker.txt
-    pasta="${PWD}/aval"
-    mkdir -p "$pasta" || { echo "Falha ao criar a pasta ${pasta}. Verifique as permissões."; exit 1; }
+    echo "A pasta ${pasta} não existe,... criando agora..."
+    pasta="${padrao}"
 fi
 
+# Criar a pasta quando não existir
+# mkdir -p "$pasta" || { echo "Falha ao criar a pasta ${pasta}. Verifique as permissões."; exit 1; }
+
 # Clonar o repositório contendo os scripts de instalação na pasta indicada
-echo "Usando a pasta indicada para baixar os scripts." 2>${pasta}/logInstallDocker.txt
-sudo git clone https://github.com/sofismavaz/opt.git $pasta
+echo "Usando a pasta indicada para baixar os scripts."
+git clone https://github.com/sofismavaz/opt.git $pasta
 
 # verifica se os scripts necessários estão presentes
 if [ ! -f /$pasta/installDocker.sh ]; then
@@ -65,11 +69,11 @@ read -p "Escolha uma opção (0-6): " opcao
 case $opcao in
     0)
         echo "Iniciando a instalação do Docker Compose..."
-        bash /$pasta/installDocker.sh
+        bash /$pasta/installDocker.sh 2>${pasta}/logInstallDocker.txt
         ;;
     1)
         echo "Preparando ambiente de uso do Docker Compose..."
-        bash /$pasta/installDocker.sh  2>${pasta}/logInstallDocker.txt
+        bash /$pasta/preparaSODocker.sh  2>${pasta}/logInstallDocker.txt
         ;;
     2)
         echo "Iniciando a instalação do Portainer e Traefik..."
