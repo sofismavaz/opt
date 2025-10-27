@@ -9,7 +9,7 @@
 # Este script configura as variáveis de ambiente do ambiente operacional
 
 # verifica se o grupo docker foi criado
-if ! getent group docker > /dev/null 2>&1; then
+if [ ! getent group docker ]; then
     # Criar grupo docker se não existir
     sudo groupadd docker >> logInstallDocker.txt
     echo "Grupo docker criado." >> logInstallDocker.txt
@@ -23,7 +23,6 @@ echo "Usuário adicionado ao grupo docker." >> logInstallDocker.txt
 
 # Mudar grupo principal do usuário para docker
 sudo usermod -g docker $USER >> logInstallDocker.txt
-newgrp docker
 echo "Grupo principal do usuário alterado para docker." >> logInstallDocker.txt
 
 # Habilitar o serviço Docker para iniciar com o sistema
