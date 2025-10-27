@@ -31,27 +31,27 @@ git clone https://github.com/sofismavaz/opt.git $pasta
 
 # verifica se os scripts necessários estão presentes
 if [ ! -f /$pasta/installDocker.sh ]; then
-    echo "Script installDocker.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    echo "Script installDocker.sh não encontrado em $pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
     exit 1
 fi
 if [ ! -f /$pasta/preparaSODocker.sh ]; then
-    echo "Script preparaSODocker.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    echo "Script preparaSODocker.sh não encontrado em $pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
     exit 1
 fi
 if [ ! -f /$pasta/installPortainerTraefik.sh ]; then
-    echo "Script installPortainerTraefik.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    echo "Script installPortainerTraefik.sh não encontrado em $pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
     exit 1
 fi
 if [ ! -f /$pasta/installArchivematica.sh ]; then
-    echo "Script installArchivematica.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    echo "Script installArchivematica.sh não encontrado em $pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
     exit 1
 fi
 if [ ! -f /$pasta/installAtoM.sh ]; then
-    echo "Script installAtoM.sh não encontrado em /$pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
+    echo "Script installAtoM.sh não encontrado em $pasta. Por favor, verifique." 2>${pasta}/logInstallDocker.txt
     exit 1
 fi
 if [ ! -f /$pasta/dockerEntrypoint.sh ]; then
-    echo "Script dockerEntrypoint.sh não encontrado em /$pasta. Por favor, verifique."
+    echo "Script dockerEntrypoint.sh não encontrado em $pasta. Por favor, verifique."
     exit 1
 fi
 
@@ -69,27 +69,27 @@ read -p "Escolha uma opção (0-6): " opcao
 case $opcao in
     0)
         echo "Iniciando a instalação do Docker Compose..."
-        bash /$pasta/installDocker.sh 2>${pasta}/logInstallDocker.txt
+        bash $pasta/installDocker.sh 2>${pasta}/logInstallDocker.txt
         ;;
     1)
         echo "Preparando ambiente de uso do Docker Compose..."
-        bash /$pasta/preparaSODocker.sh  2>${pasta}/logInstallDocker.txt
+        bash $pasta/preparaSODocker.sh  2>${pasta}/logInstallDocker.txt
         ;;
     2)
         echo "Iniciando a instalação do Portainer e Traefik..."
-        bash /$pasta/installPortainerTraefik.sh 2>${pasta}/logInstallDocker.txt
+        bash $pasta/installPortainerTraefik.sh 2>${pasta}/logInstallDocker.txt
         ;;
     3)
         echo "Inicianndo a instalação do Archivemática..."
-        bash /$pasta/installArchivematica.sh 2>${pasta}/logInstallDocker.txt
+        bash $pasta/installArchivematica.sh 2>${pasta}/logInstallDocker.txt
         ;;
     4)
         echo "Iniciando a instalação do AtoM..."
-        bash /$pasta/installAtoM.sh 2>${pasta}/logInstallDocker.txt
+        bash $pasta/installAtoM.sh 2>${pasta}/logInstallDocker.txt
         ;;
     5)
         echo "Iniciando a configuração do Docker EntryPoint..."
-        bash /$pasta/dockerEntrypoint.sh 2>${pasta}/logInstallDocker.txt
+        bash $pasta/dockerEntrypoint.sh 2>${pasta}/logInstallDocker.txt
         ;;
     6)
         echo "Saindo do menu de instalação."
