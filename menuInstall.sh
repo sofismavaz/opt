@@ -26,8 +26,8 @@ fi
 # mkdir -p "$pasta" || { echo "Falha ao criar a pasta ${pasta}. Verifique as permissões."; exit 1; }
 
 # Clonar o repositório contendo os scripts de instalação na pasta indicada
-echo "Usando a pasta indicada para baixar os scripts."
-git clone https://github.com/sofismavaz/opt.git $pasta
+# echo "Usando a pasta indicada para baixar os scripts."
+# git clone https://github.com/sofismavaz/opt.git $pasta
 
 # verifica se os scripts necessários estão presentes
 if [ ! -f /$pasta/installDocker.sh ]; then
@@ -58,23 +58,26 @@ fi
 while true; do
 echo "----------------------------------------"
 echo "Menu de Instalação de Aplicações Docker"
-echo "0 - Instalar Docker"
-echo "1 - Preparar o ambiente para uso do Docker"
+echo ""
+echo "Este Script funcionará a partir de um pre-requisito - preparaAmbiente.sh -"
+echo ""
+# echo "0 - Instalar Docker"
+# echo "1 - Preparar o ambiente para uso do Docker"
 echo "2 - Instalar Portainer e Traefik"
 echo "3 - Instalar Archivemática"
 echo "4 - Instalar AtoM"
 echo "5 - Instalar Docker EntryPoint"
 echo "6 - Sair"
-read -p "Escolha uma opção (0-6): " opcao
+read -p "Escolha uma opção (2-6): " opcao
 case $opcao in
-    0)
-        echo "Iniciando a instalação do Docker Compose..."
-        bash $pasta/installDocker.sh 2>${pasta}/logInstallDocker.txt
-        ;;
-    1)
-        echo "Preparando ambiente de uso do Docker Compose..."
-        bash $pasta/preparaSODocker.sh  2>${pasta}/logInstallDocker.txt
-        ;;
+#    0)
+#        echo "Iniciando a instalação do Docker Compose..."
+#        bash $pasta/installDocker.sh 2>${pasta}/logInstallDocker.txt
+#        ;;
+#    1)
+#        echo "Preparando ambiente de uso do Docker Compose..."
+#        bash $pasta/preparaSODocker.sh  2>${pasta}/logInstallDocker.txt
+#        ;;
     2)
         echo "Iniciando a instalação do Portainer e Traefik..."
         bash $pasta/installPortainerTraefik.sh 2>${pasta}/logInstallDocker.txt
