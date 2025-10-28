@@ -1,27 +1,56 @@
-## Instalação automatizada
+## Instruções sobre a Instalação
 
-Será possível executar a configuração e instalação dos aplicativos de forma automatizada ou passo-a-passo, seguindo o roteiro a seguir.
+Será possível executar a configuração e instalação do Docker e dos aplicativos Portainer, Archivemática e AtoM de forma automatizada ou passo-a-passo, seguindo o roteiro este.
 
 #### Para a Configuração Automatizada
 Os scrips de configuração e instalação estão disponíveis no servidor git e será possível executá-los na pasta */opt* 
 
 ```shell
-sudo git clone https://github.com/sofismavaz/opt.git /opt
+sudo git clone http://git.tre-ac.jus.br/lrocio/archivematica.git /opt
+ou
+sudo git clone http://10.168.122.5/lrocio/archivematica.git /opt
 ```
 
-A estrutura de execução lhe oferece um menu com diretivas de configuração e instalação das aplicações:
+1. A proposra de execução lhe oferece um menu com diretivas de configuração e instalação das aplicações:
 
+1.1. Com o perfil de usuário e Sessão (id) local, executar o Script *preparaAmbiente.sh* :
+
+``` 
+Menu de Instalação do Docker Compose
 ---
+    0. Instalar Docker
+    1. Preparar o ambiente para uso do Docker
+``` 
+1.2. Após a preparação do ambiente operacional e instalação do Docker Compose, o usuário ingressa no grupo Docker e executa os Scripts de Instalação da aplicação:
+
+```shell
+newgrp docker
+id
+```
+```
 Menu de Instalação de Aplicações Docker
-0. Instalar Docker
-1. Preparar o ambiente para uso do Docker
+---
 2. Instalar Portainer e Traefik
 3. Instalar Archivemática
 4. Instalar AtoM
 5. Instalar Docker EntryPoint
 6. Sair
-Escolha uma opção (0-6):
----
+Escolha uma opção (2-6):
+``` 
+
+#### Descrição dos Scripts de instalação:
+0. *preparaAmbiente.sh* : Prepara as variáveis de ambiente, baixa os scripts e chama os scripts gravados na pasta indicada.
+0.1 *installDocker.sh* : desinstala umaa versão residual ou nativa do Docker e instala a versão baixada diretamente do site oficial Docker Compose.
+1.1. *preparaSODocker.sh* : Configura as variáveis de ambiente do ambiente operacional para uso do Docker.
+
+#### Descrição dos Scripts de instalação das aplicações: Portainer, Traefik, Archivemática e AtoM:
+Após iniciar uma nova sessão docker, o usuário poderá executar os scripts de instalação das aplicações, que estarão sendo criadas sob o domínio docker.
+
+1. *menuInstall.sh* : Este Menu chamará os Scripts de preparação do emabiente de instalação das aplicações Docker
+2. *installPortainerTraefik.sh* : Este script deverá ser executado após a instalação e configuração da aplicação Docker, criará a estrutura de pastas e configuração de arquivos necessária para o uso do Portainer e Traefik.
+3. *installArchivematica.* : Este script deverá ser executado após a instalação e configuração do archivematica com Docker
+4. *installAtoM.sh* : Instalação do AtoM DOCKER COMPOSE
+5. *dockerEntrypoint.sh* : Este script configurará o container SSH para operação como servidor ou cliente SSH, ele utilizará variáveis de ambiente para configurar chaves de autenticação e tarefas
 
 ## Instalação manual
 

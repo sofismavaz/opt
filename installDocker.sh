@@ -10,7 +10,14 @@
 # Desinstalará uma versão residual ou nativa do Docker e Instalará a versão oficial Docker Compose.
 
 # Limpar o arquivo de log anterior
-> logInstallDocker.txt
+#> logInstallDocker.txt
+dest=${pasta}
+  
+echo ${pasta}
+echo ${dest}
+
+exit
+
 
 # Preparação do sistema para instalação do Docker
 sudo apt remove docker docker-engine docker.io containerd runc

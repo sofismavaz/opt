@@ -61,11 +61,15 @@ echo "Usando a pasta indicada para baixar os scripts."
 git clone https://github.com/sofismavaz/opt.git $pasta
 
         echo "Iniciando a instalação do Docker Compose..."
-        bash $pasta/installDocker.sh 2>${pasta}/logInstallDocker.txt
+        bash $pasta/installDocker.sh  ${pasta}/logInstallDocker.txt 2>${pasta}/logInstallDocker.txt
 
         echo "Preparando ambiente de uso do Docker Compose..."
         bash $pasta/preparaSODocker.sh  2>${pasta}/logInstallDocker.txt
 
+echo ""
+echo ""
 echo "O ambiente está preparado para a instalação dos aplicativos Archivematica e AtoM"
 echo "Entrar em uma nova sessão, com o comando - newgrp docker - e processar a instalação com o grupo Docker"
 echo "O Script menuInstall.sh executa os passos de configuração e instalação dos aplicativos."
+echo ""
+echo ""
