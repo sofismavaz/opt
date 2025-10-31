@@ -9,18 +9,45 @@
 # Este script deverá ser executado após a instalação e configuração da aplicação Docker
 # Criará a estrutura de pastas e configuração de arquivos necessária para o uso do Portainer e Traefik.
 
-# Limpar o arquivo de log anterior
-> logInstallPortTraefik.txt
+# Recebe pasta de destino da instalação como argumento
+pastaLog=$1
+
+if [ -z "$pastaLog" ]; then
+    pastaLog="${HOME}/tmp"
+    mkdir -p $pastaLog
+fi
+
+touch $pastaLog/logInstallPortTraefik.txt
+
+# Definir variáveis de destino para instalação e processamento
+pastaInstalacao="/opt"
+pastaInstallTraefik="/opt/traefik"
+pastaInstallPortainer="/opt/portainer"
+pastaProcessamento="/mnt/rdcarq"
 
 # Criar pastas Portainer
-sudo mkdir -p /opt/portainer/data >> logInstallPortTraefik.txt 2>&1
-echo "Pasta portainer criados." >> logInstallPortTraefik.txt
+sudo mkdir -p $pastaInstallPortainer/data 2>$pastaLog/logInstallPortTraefik.txt
+echo "Pasta portainer e data criados." 2>$pastaLog/logInstallPortTraefik.txt
+
+# Criar diretórios principais
+sudo mkdir -p $pastaInstallTraefik/{acme,config,dynamic,letsencrypt,logs} 2>$pastaLog/logInstallPortTraefik.txt
+sudo mkdir -p $pastaInstallPortainer/data 2>$pastaLog/logInstallPortTraefik.txt
+echo "Diretórios da estrutura de tráfego rede." 2>$pastaLog/logInstallPortTraefik.txt
+
+# Criar volumes de processamento dos pacotes AIP, DIP, Backlog e Transferência
+sudo mkdir -p $pastaProcessamento/rdcarq/transfer $pastaProcessamento/transfer-sistema $pastaProcessamento/rdcarq/repositorio/{aip,dip,backlog} 2>$pastaLog/logInstallPortTraefik.txt
+sudo mkdir -p $pastaProcessamento/integracao 2>$pastaLog/logInstallPortTraefik.txt
+sudo mkdir -p $pastaInstalacao/rsync 2>$pastaLog/logInstallPortTraefik.txt
+echo "Volumes de processamento criados." 2>$pastaLog/logInstallPortTraefik.txt
+
+# Definir permissões
+sudo chmod -R 755 $pastaInstallTraefik $pastaInstallPortainer $pastaProcessamento/rdcarq 2>$pastaLog/logInstallPortTraefik.txt
+sudo chgrp -R docker $pastaInstallTraefik $pastaInstallPortainer $pastaProcessamento $pastaProcessamento/integracao $pastaInstalacao/atom $pastaInstalacao/rsync 2>$pastaLog/logInstallPortTraefik.txt
+sudo chmod 600 $pastaInstallTraefik/traefik/acme/acme.json 2>$pastaLog/logInstallPortTraefik.txt
+echo "Permissões de acesso e execução definidas." 2>$pastaLog/logInstallPortTraefik.txt
 
 # Criar arquivos de configuração do Portainer
-touch /opt/portainer/compose.yaml >> logInstallPortTraefik.txt 2>&1
-echo "Arquivo docker-compose.yaml criado." >> logInstallPortTraefik.txt
-
-cat <<EOL > /opt/portainer/compose.yaml 2>> logInstallPortTraefik.txt
+cat <<EOL > $pastaLog/composePortainer.yaml
 services:
   portainer:
     image: portainer/portainer-ce:latest
@@ -50,18 +77,10 @@ networks:
 volumes:
   portainer_data:
 EOL
-echo "Arquivo compose portainer criado." >> logInstallPortTraefik.txt
-
-# Criar diretórios principais
-sudo mkdir -p /opt/traefik/{acme,config,dynamic,letsencrypt,logs} >> logInstallPortTraefik.txt 2>&1
-echo "Diretórios da estrutura de tráfego rede." >> logInstallPortTraefik.txt
-
-# Criar arquivo de configuração inicial
-touch /opt/traefik/acme/acme.json /opt/traefik/dynamic/dynamic.yml /opt/traefik/traefik.yml /opt/traefik/compose.yaml >> logInstallPortTraefik.txt
-echo "Arquivos de configuração inicial criados." >> logInstallPortTraefik.txt
+echo "Arquivo docker compose portainer criado." 2>$pastaLog/logInstallPortTraefik.txt
 
 # Adicionar conteúdo ao arquivo traefik.yml
-cat <<EOL > /opt/traefik/traefik.yml 2>> logInstallPortTraefik.txt
+cat <<EOL > $pastaLog/traefik.yml
 api:
   dashboard: true
   insecure: true
@@ -109,10 +128,10 @@ accessLog:
   filePath: "/var/log/traefik/access.log"
   format: json
 EOL
-echo "Conteúdo adicionado ao arquivo traefik.yml." >> logInstallPortTraefik.txt
+echo "Conteúdo adicionado ao arquivo traefik.yml." 2>$pastaLog/logInstallPortTraefik.txt
 
 # Adicionar conteúdo ao arquivo dynamic.yml
-cat <<EOL > /opt/traefik/dynamic/dynamic.yml 2>> logInstallPortTraefik.txt
+cat <<EOL > $pastaLog/dynamic.yml
 entryPoints:
   web:
     address: ":80"
@@ -133,10 +152,10 @@ certificatesResolvers:
       httpChallenge:
         entryPoint: web            # desafio pela porta 80
 EOL
-echo "Conteúdo adicionado ao arquivo dynamic.yml." >> logInstallPortTraefik.txt
+echo "Conteúdo adicionado ao arquivo dynamic.yml." 2>$pastaLog/logInstallPortTraefik.txt
 
 # Criar o arquivo *compose.yaml* no diretório *traefik*
-cat <<EOL > /opt/traefik/compose.yaml 2>> logInstallPortTraefik.txt
+cat <<EOL > $pastaLog/composeTraefik.yaml
 services:
   traefik:
     image: traefik:v3.5
@@ -151,27 +170,40 @@ services:
       - TRAEFIK_GLOBAL_SENDANONYMOUSUSAGE=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /opt/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - /opt/traefik/dynamic:/etc/traefik/dynamic:ro
-      - /opt/traefik/acme:/etc/traefik/acme
-      - /opt/traefik/logs:/var/log/traefik
+      - ${pastaInstallTraefik}/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ${pastaInstallTraefik}/dynamic:/etc/traefik/dynamic:ro
+      - ${pastaInstallTraefik}/acme:/etc/traefik/acme
+      - ${pastaInstallTraefik}/logs:/var/log/traefik
       - /etc/letsencrypt:/etc/letsencrypt:ro
 networks:
   traefik:
     external: true
 EOL
 
-# Criar volumes de processamento dos pacotes AIP, DIP, Backlog e Transferência
-sudo mkdir -p /mnt/rdcarq/transfer /mnt/transfer-sistema /mnt/rdcarq/repositorio/{aip,dip,backlog} >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-sudo mkdir -p /opt/rsync >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-sudo mkdir -p /mnt/integracao >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-sudo mkdir -p /mnt/atom/{uploads,downloads,config,plugins} >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-echo "Volumes de processamento criados." >> logInstallPortTraefik.txt
+# Criar arquivo de configuração inicial
+sudo touch $pastaInstallTraefik/acme/acme.json 2>$pastaLog/logInstallPortTraefik.txt
+sudo mv $pastaLog/composePortainer.yaml $pastaInstallPortainer/compose.yaml
+sudo mv $pastaLog/traefik.yml $pastaInstallTraefik/traefik.yml
+sudo mv $pastaLog/dynamic.yml $pastaInstallTraefik/dynamic/dynamic.yml
+sudo mv $pastaLog/composeTraefik.yaml $pastaInstallTraefik/compose.yaml
 
-# Definir permissões
-sudo chmod -R 755 /opt/traefik /opt/portainer /mnt/rdcarq >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-sudo chgrp -R docker /opt/traefik /opt/portainer /mnt/rdcarq /mnt/integracao /mnt/atom /opt/rsync >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-sudo chmod 600 /opt/traefik/acme/acme.json >> logInstallPortTraefik.txt 2>> logInstallPortTraefik.txt
-echo "Permissões de acesso e execução definidas." >> logInstallPortTraefik.txt
+# Definir permissões dos arquivos criados
+sudo chown -R root:docker $pastaInstallTraefik/acme/acme.json $pastaInstallPortainer/compose.yaml $pastaInstallTraefik/traefik.yml $pastaInstallTraefik/dynamic/dynamic.yml $pastaInstallTraefik/compose.yaml 2>$pastaLog/logInstallPortTraefik.txt
+sudo chmod 600 $pastaInstallTraefik/acme/acme.json 2>$pastaLog/logInstallPortTraefik.txt
 
+echo "Arquivos de configuração inicial criados." 2>$pastaLog/logInstallPortTraefik.txt
 
+# Será necessário criar a conexão de rede para que a o serviço da imagem Docker possa trafegar os dados.
+docker network create traefik 2>$pastaLog/logInstallPortTraefik.txt
+echo "Rede Docker 'traefik' criada." 2>$pastaLog/logInstallPortTraefik.txt
+
+# Levantar o serviço Traefik
+docker compose -f $pastaInstallTraefik/compose.yaml up -d 2>$pastaLog/logInstallPortTraefik.txt
+echo "Serviço Traefik iniciado." 2>$pastaLog/logInstallPortTraefik.txt  
+
+# Levantar o serviço Portainer
+docker compose -f $pastaInstallPortainer/compose.yaml up -d 2>$pastaLog/logInstallPortainer.txt
+echo "Serviço Portainer iniciado." 2>$pastaLog/logInstallPortainer.txt
+echo "Instalação do Portainer e Traefik concluída com sucesso." 2>$pastaLog/logInstallPortainer.txt
+
+return 0

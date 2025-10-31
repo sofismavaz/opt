@@ -7,18 +7,40 @@
 #
 # Instruções iniciais
 # Este script instalará o AtoM (Access to Memory) utilizando Docker
-# Limpar o arquivo de log anterior
-> logInstallAtoM.txt
+
+# Recebe pasta de destino da instalação como argumento
+pastaLog=$1
+if [ -z "$pastaLog" ]; then
+    pastaLog="${HOME}/tmp"
+    mkdir -p $pastaLog
+fi
+
+> $pastaLog/logInstallAtoM.txt
+
+# Definir variáveis de destino de processamento
+pastaInstallAtoM="/opt/atom"
+sudo mkdir -p $pastaInstallAtoM/{uploads,downloads,config,plugins} 2>$pastaLog/logInstallAtoM.txt
+
+# Definir variáveis de destino de processamento
+pastaProcessamento="/mnt/rdcarq"
+if [ ! -d "$pastaProcessamento" ]; then
+    sudo mkdir -p $pastaProcessamento 2>$pastaLog/logInstallAtoM.txt
+fi
 
 # Baixar o código do AtoM diretamente da plataforma gitHub
-### Instalação do AtoM DOCKER COMPOSE
-git clone -b qa/2.x https://github.com/artefactual/atom.git /opt/atom
-cd /opt/atom
+git clone -b qa/2.x https://github.com/artefactual/atom.git $pastaInstallAtoM
+
+# Acessar a pasta do AtoM
+chmod -R 775 $pastaInstallAtoM 2>$pastaLog/logInstallAtoM.txt
+
+cd $pastaInstallAtoM
 git checkout v2.10.0
 git pull origin v2.10.0
 
-echo "Código do AtoM baixado." >> logInstallAtoM.txt
-cat <<EOL > /opt/atom/docker/compose.yaml 2>> logInstallAtoM.txt
+# Criar arquivo docker-compose.yaml do AtoM
+sudo mkdir -p $pastaInstallAtoM/docker 2>$pastaLog/logInstallAtoM.txt
+
+cat <<EOL > $pastaLog/dockerCompose.yaml
 services:
   atom:
     image: docker-atom
@@ -38,12 +60,12 @@ services:
     volumes:
       - "composer_deps:/atom/src/vendor/composer"
       - "npm_deps:/atom/src/node_modules"
-      - "/opt/atom:/atom/src:rw"
-      - "/opt/atom/docker/etc/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:ro"
-      - "/mnt/atom/uploads:/usr/share/nginx/atom/uploads"
-      - "/mnt/atom/downloads:/usr/share/nginx/atom/downloads"
-      - "/mnt/atom/config:/usr/share/nginx/atom/config"
-      - "/mnt/atom/plugins/:/usr/share/nginx/atom/plugins/"
+      - "${pastaInstallAtoM}:/atom/src:rw"
+      - "${pastaInstallAtoM}/docker/etc/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:ro"
+      - "${pastaProcessamento}/uploads:/usr/share/nginx/atom/uploads"
+      - "${pastaProcessamento}/downloads:/usr/share/nginx/atom/downloads"
+      - "${pastaProcessamento}/config:/usr/share/nginx/atom/config"
+      - "${pastaProcessamento}/plugins/:/usr/share/nginx/atom/plugins/"
     networks:
       - default
   atom_worker:
@@ -69,11 +91,11 @@ services:
     volumes:
       - "composer_deps:/atom/src/vendor/composer"
       - "npm_deps:/atom/src/node_modules"
-      - "/opt/atom:/atom/src:rw"
-      - "/mnt/atom/uploads:/usr/share/nginx/atom/uploads"
-      - "/mnt/atom/downloads:/usr/share/nginx/atom/downloads"
-      - "/mnt/atom/config:/usr/share/nginx/atom/config"
-      - "/mnt/atom/plugins/:/usr/share/nginx/atom/plugins/"
+      - "${pastaInstallAtoM}:/atom/src:rw"
+      - "${pastaProcessamento}/uploads:/usr/share/nginx/atom/uploads"
+      - "${pastaProcessamento}/downloads:/usr/share/nginx/atom/downloads"
+      - "${pastaProcessamento}/config:/usr/share/nginx/atom/config"
+      - "${pastaProcessamento}/plugins/:/usr/share/nginx/atom/plugins/"
       - "/mnt/integracao:/data"
     networks:
       - default
@@ -82,8 +104,8 @@ services:
     volumes:
       - composer_deps:/atom/src/vendor/composer
       - npm_deps:/atom/src/node_modules
-      - /opt/atom:/atom/src:ro
-      - /opt/atom/docker/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - $pastaInstalacaoAtoM:/atom/src:ro
+      - $pastaInstalacaoAtoM/docker/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
@@ -134,7 +156,7 @@ services:
       MYSQL_PASSWORD: "atom_12345"
     volumes:
       - percona_data:/var/lib/mysql:rw
-      - /opt/atom/docker/etc/mysql/mysqld.cnf:/etc/my.cnf.d/mysqld.cnf:ro
+      - ${pastaInstallAtoM}/docker/etc/mysql/mysqld.cnf:/etc/my.cnf.d/mysqld.cnf:ro
     expose:
       - "3306"
     networks:
@@ -189,22 +211,29 @@ networks:
       name: integracao
 EOL
 
+# Mover o arquivo para a pasta correta
+sudo mv $pastaLog/dockerCompose.yaml $pastaInstallAtoM/docker/compose.yaml
+sudo chgrp -R docker $pastaInstallAtoM 2>$pastaLog/logInstallAtoM.txt
+echo "Arquivo docker-compose do AtoM criado." 2>$pastaLog/logInstallAtoM.txt
+
 # Criar conteineres
-cd /opt/atom/docker
-docker compose -f docker-compose.dev.yml up -d
+cd $pastaInstallAtoM/docker
+docker-compose -f $pastaInstallAtoM/docker/docker-compose.dev.yml up -d
 
 # Inicializar banco de dados
-docker compose exec atom php -d memory_limit=-1 symfony tools:purge --demo
+docker-compose -f $pastaInstallAtoM/docker/docker-compose.dev.yml exec atom php -d memory_limit=-1 symfony tools:purge --demo
 
 # Compilar os temas
-docker compose exec atom npm install
-docker compose exec atom npm run build
+docker-compose -f $pastaInstallAtoM/docker/docker-compose.dev.yml exec atom npm install
+docker-compose -f $pastaInstallAtoM/docker/docker-compose.dev.yml exec atom npm run build
 
 # Reiniciar o atom_worker
-docker compose restart atom_worker
+docker-compose -f $pastaInstallAtoM/docker/docker-compose.dev.yml restart atom_worker
 
 #Testar
 #http://localhost:63001 ou http://10.168.122.6:63001
 
 echo "Instalação do AtoM concluída." >> logInstallAtoM.txt
+return 0
+
 # Fim do Script

@@ -3,17 +3,21 @@
 Será possível executar a configuração e instalação do Docker e dos aplicativos Portainer, Archivemática e AtoM de forma automatizada ou passo-a-passo, seguindo o roteiro este.
 
 #### Para a Configuração Automatizada
-Os scrips de configuração e instalação estão disponíveis no servidor git e será possível executá-los na pasta */opt* 
+Os scrips de configuração e instalação estão disponíveis no servidor git do TRE-AC e será possível executá-los na pasta */$HOME/archivematica*
 
 ```shell
-sudo git clone http://git.tre-ac.jus.br/lrocio/archivematica.git /opt
+git clone http://git.tre-ac.jus.br/lrocio/archivematica.git "${HOME}/archivematica"
 ou
-sudo git clone http://10.168.122.5/lrocio/archivematica.git /opt
+git clone http://10.168.122.5/lrocio/archivematica.git "${HOME}/archivematica"
 ```
 
-1. A proposra de execução lhe oferece um menu com diretivas de configuração e instalação das aplicações:
-
-1.1. Com o perfil de usuário e Sessão (id) local, executar o Script *preparaAmbiente.sh* :
+A proposta de automação oferecerá um menu com diretivas de configuração e instalação das aplicações e com o perfil de usuário e *sessão (id) local*, executar o Script *preparaAmbiente.sh*
+```shell
+$ chmod +x ${HOME}/archivematica/*.sh
+$ cd ${HOME}/archivematica
+$ ls -al
+$ ./preparaAmbiente.sh
+``` 
 
 ``` 
 Menu de Instalação do Docker Compose
@@ -21,20 +25,28 @@ Menu de Instalação do Docker Compose
     0. Instalar Docker
     1. Preparar o ambiente para uso do Docker
 ``` 
-1.2. Após a preparação do ambiente operacional e instalação do Docker Compose, o usuário ingressa no grupo Docker e executa os Scripts de Instalação da aplicação:
+Após a preparação do ambiente operacional, o Docker Compose deverá ter sido instalado. Nesta fase o usuário estará no grupo *docker* e todas as ações serão executas sob as diretivas dos Scripts de Instalação da aplicação:
 
-```shell
-newgrp docker
-id
+```shell 
+abrir a sessão no novo grupo "docker" e verificar se ele é o grupo principal do usuário 
+ $ docker --version
+ $ newgrp docker
+ $ id
 ```
+Ao confirmar o sucesso da instalação do Docker, será possível avançar na implantação dos aplicativos RDC-Arq:
+
+```shell 
+ $ ./menuInstall.sh
+```
+
 ```
 Menu de Instalação de Aplicações Docker
 ---
-2. Instalar Portainer e Traefik
-3. Instalar Archivemática
-4. Instalar AtoM
-5. Instalar Docker EntryPoint
-6. Sair
+    2. Instalar Portainer e Traefik
+    3. Instalar Archivemática
+    4. Instalar AtoM
+    5. Instalar Docker EntryPoint
+    6. Sair
 Escolha uma opção (2-6):
 ``` 
 

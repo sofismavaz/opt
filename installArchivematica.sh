@@ -8,35 +8,43 @@
 # Instruções iniciais
 # Este script deverá ser executado após a instalação e configuração do archivematica com Docker
 
-# Limpar o arquivo de log anterior
-> logInstallArchivematica.txt
-# Criar pastas Archivematica
-# mkdir -p /opt/archivematica/{db,storage-service,transfer-source,transfer-destination,workflow-service} >> logInstallArchivematica.txt 2>&1
-# echo "Pastas do Archivematica criadas." >> logInstallArchivematica.txt
+# Recebe pasta de destino da instalação como argumento
+pastaLog=$1
+if [ -z "$pastaLog" ]; then
+    pastaLog="${HOME}/tmp"
+    mkdir -p $pastaLog
+fi
+
+> $pastaLog/logInstallArchivematica.txt
+
+# Definir variáveis de destino de processamento
+pastaInstalacao="/opt"
+pastaProcessamento="/mnt/rdcarq"
+pastaInstallArchivematica="/opt/archivematica"
 
 # Ajuste de memória para o ElasticSearch
-sudo sysctl -w vm.max_map_count=262144 >> logInstallArchivematica.txt 2>&1
-echo "Parâmetro de memória do ElasticSearch ajustado." >> logInstallArchivematica.txt
+sudo sysctl -w vm.max_map_count=262144 2>$pastaLog/logInstallArchivematica.txt
+echo "Parâmetro de memória do ElasticSearch ajustado." 2>$pastaLog/logInstallArchivematica.txt
 
 # Adicionar ao sysctl.conf para manter a configuração após reinício
-sudo echo "vm.max_map_count=262144" >> /etc/sysctl.conf 2>> logInstallArchivematica.txt
-echo "Parâmetro de memória do ElasticSearch adicionado ao sysctl.conf." >> logInstallArchivematica.txt
+sudo echo "vm.max_map_count=262144" >> /etc/sysctl.conf 2>$pastaLog/logInstallArchivematica.txt
+echo "Parâmetro de memória do ElasticSearch adicionado ao sysctl.conf." 2>$pastaLog/logInstallArchivematica.txt
 
 # Baixar o código do archivemática diretamente da plataforma gitHub
-git clone https://github.com/artefactual/archivematica.git --recurse-submodules /opt/archivematica >> logInstallArchivematica.txt 2>&1
-echo "Código do Archivematica baixado." >> logInstallArchivematica.txt
+git clone https://github.com/artefactual/archivematica.git --recurse-submodules $pastaInstallArchivematica 2>$pastaLog/logInstallArchivematica.txt
+echo "Código do Archivematica baixado." >> $pastaLog/logInstallArchivematica.txt
 
 # Adicionar usuário ao grupo docker
-sudo usermod -aG docker $USER >> logInstallArchivematica.txt 2>&1
-echo "Usuário adicionado ao grupo docker." >> logInstallArchivematica.txt
+sudo usermod -aG docker $USER 2>$pastaLog/logInstallArchivematica.txt
+echo "Usuário adicionado ao grupo docker." >> $pastaLog/logInstallArchivematica.txt
 
 # Definir permissões
-chmod -R 755 /opt/archivematica >> logInstallArchivematica.txt 2>> logInstallArchivematica.txt
-chgrp -R docker /opt/archivematica >> logInstallArchivematica.txt 2>> logInstallArchivematica.txt
-echo "Permissões de acesso e execução definidas." >> logInstallArchivematica.txt
+chmod -R 755 $pastaInstallArchivematica 2>$pastaLog/logInstallArchivematica.txt
+chgrp -R docker $pastaInstallArchivematica 2>$pastaLog/logInstallArchivematica.txt
+echo "Permissões de acesso e execução definidas." 2>$pastaLog/logInstallArchivematica.txt
 
 # Fazer a conferência de versão para garantir a compatibilidade
-cd /opt/archivematica
+cd $pastaInstallArchivematica
 git checkout v1.18.0
 git pull origin v1.18.0 
 
@@ -45,14 +53,14 @@ git pull origin v1.18.0 --rebase
 git submodule update --init --recursive
 
 # Criação dos volumes
-cd /opt/archivematica/hack
+cd $pastaInstallArchivematica/hack
 make create-volumes
 make build
-echo "Volumes do Archivematica criados." >> logInstallArchivematica.txt
+echo "Volumes do Archivematica criados." 2>$pastaLog/logInstallArchivematica.txt
 
 # Criar arquivo docker-compose.yaml do Archivematica
-cd /opt/archivematica/hack
-cat <<EOL > compose.yaml 2>> logInstallArchivematica.txt
+cd $pastaInstallArchivematica/hack
+cat <<EOL > $pastaLog/composeHackArchivematica.yaml
 services:
   mysql:
     image: "percona/percona-server:8.0.43-34"
@@ -172,7 +180,7 @@ services:
       ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_METADATA_XML_VALIDATION_ENABLED: "true"
       #METADATA_XML_VALIDATION_SETTINGS_FILE: "/src/hack/submodules/archivematica-sampledata/xml-validation/xml_validation.py"
     volumes:
-      - "/opt/archivematica/chaves:/home/archivematica/.ssh/"
+      - "${pastaInstallArchivematica}/chaves:/home/archivematica/.ssh/"
       - "archivematica_pipeline_data:/var/archivematica/sharedDirectory:rw"
     links:
       - "clamavd"
@@ -256,15 +264,15 @@ services:
       SESSION_COOKIE_SECURE: "false"
       CSRF_COOKIE_SECURE: "false"
     volumes:
-      - "/opt/archivematica/hack/submodules/archivematica-sampledata/:/home/archivematica/archivematica-sampledata/:ro"
+      - "${pastaInstallArchivematica}/hack/submodules/archivematica-sampledata/:/home/archivematica/archivematica-sampledata/:ro"
       - "archivematica_pipeline_data:/var/archivematica/sharedDirectory:rw"
       - "archivematica_storage_service_staging_data:/var/archivematica/storage_service:rw"
       # COMPARTILHAR: partição destinada para a movimentação manual - documentação autenticada
-      - "/mnt/rdcarq/transfer/:/transfer:rw"
+      - "${pastaProcessamento}/transfer/:/transfer:rw"
       # NÃO COMPARTILHAR: partição destinada para a interoperabilidade entre sistema
       # - cadeia de custódia - documentos autênticos
-      - "/mnt/rdcarq/transfer-sistema/:/transfer-sistema:rw"
-      - "/mnt/rdcarq/repositorio/:/rdcarq:rw"
+      - "${pastaProcessamento}/transfer-sistema/:/transfer-sistema:rw"
+      - "${pastaProcessamento}/repositorio/:/rdcarq:rw"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
@@ -318,16 +326,21 @@ volumes:
     external: true
 EOL
 
-echo "Makefile do Archivematica criado." >> logInstallArchivematica.txt
+# Mover o arquivo para a pasta correta
+sudo mv $pastaLog/composeHackArchivematica.yaml $pastaInstallArchivematica/hack/compose.yaml 2>$pastaLog/logInstallArchivematica.txt
+sudo -R chown root:docker $pastaInstallArchivematica 2>$pastaLog/logInstallArchivematica.txt
+
+echo "Makefile do Archivematica criado." 2>$pastaLog/logInstallArchivematica.txt
 
 # Subir os containeres
-docker compose up -d
+docker $pastaInstallArchivematica/hack/compose.yaml up -d
 
 # Instalação das bases de dados
 sudo make bootstrap
 make restart-am-services
 make initialize-search-index
 make compile-translations
-echo "Instalação do Archivematica concluída." >> logInstallArchivematica.txt
+echo "Instalação do Archivematica concluída." 2>$pastaLog/logInstallArchivematica.txt
 
+return 0
 # Fim do Script

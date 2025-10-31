@@ -11,13 +11,10 @@
 
 # Limpar o arquivo de log anterior
 #> logInstallDocker.txt
-dest=${pasta}
-  
-echo ${pasta}
-echo ${dest}
-
-exit
-
+pastaDestino="$1"
+if [ -z "${pastaDestino}" ]; then
+    pastaDestino="${HOME}/archivematica"
+fi
 
 # Preparação do sistema para instalação do Docker
 sudo apt remove docker docker-engine docker.io containerd runc
@@ -32,5 +29,3 @@ sudo chmod a+r /etc/apt/keyrings/docker.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list 
 sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-
