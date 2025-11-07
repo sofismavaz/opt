@@ -2,8 +2,8 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 #
 # Autor: Lucir Vaz 
-# Data: 2024-11-04
-# Versão: 1.5
+# Data: 2024-06-27
+# Versão: 1.0
 #
 # Instruções iniciais
 # Este script deverá ser executado após a instalação e configuração da aplicação Docker
@@ -47,7 +47,7 @@ sudo chmod 600 $pastaInstallTraefik/traefik/acme/acme.json 2>$pastaLog/logInstal
 echo "Permissões de acesso e execução definidas." 2>$pastaLog/logInstallPortTraefik.txt
 
 # Criar arquivos de configuração do Portainer
-cat <<EOL > $pastaLog/composePortainer.yaml
+cat <<EOL > $pastaLog/portainer/composePortainer.yml 2>$pastaLog/logInstallPortTraefik.txt
 services:
   portainer:
     image: portainer/portainer-ce:latest
@@ -80,7 +80,7 @@ EOL
 echo "Arquivo docker compose portainer criado." 2>$pastaLog/logInstallPortTraefik.txt
 
 # Adicionar conteúdo ao arquivo traefik.yml
-cat <<EOL > $pastaLog/traefik.yml
+cat <<EOL > $pastaLog/traefik/traefik.yml 2>$pastaLog/logInstallPortTraefik.txt
 api:
   dashboard: true
   insecure: true
@@ -131,7 +131,7 @@ EOL
 echo "Conteúdo adicionado ao arquivo traefik.yml." 2>$pastaLog/logInstallPortTraefik.txt
 
 # Adicionar conteúdo ao arquivo dynamic.yml
-cat <<EOL > $pastaLog/dynamic.yml
+cat <<EOL > $pastaLog/traefik/dynamic.yml 2>$pastaLog/logInstallPortTraefik.txt
 entryPoints:
   web:
     address: ":80"
@@ -154,8 +154,8 @@ certificatesResolvers:
 EOL
 echo "Conteúdo adicionado ao arquivo dynamic.yml." 2>$pastaLog/logInstallPortTraefik.txt
 
-# Criar o arquivo *compose.yaml* no diretório *traefik*
-cat <<EOL > $pastaLog/composeTraefik.yaml
+# Criar o arquivo *compose.yml* no diretório *traefik*
+cat <<EOL > $pastaLog/traefik/composeTraefik.yml 2>$pastaLog/logInstallPortTraefik.txt
 services:
   traefik:
     image: traefik:v3.5
@@ -182,13 +182,14 @@ EOL
 
 # Criar arquivo de configuração inicial
 sudo touch $pastaInstallTraefik/acme/acme.json 2>$pastaLog/logInstallPortTraefik.txt
-sudo mv $pastaLog/composePortainer.yaml $pastaInstallPortainer/compose.yaml
-sudo mv $pastaLog/traefik.yml $pastaInstallTraefik/traefik.yml
-sudo mv $pastaLog/dynamic.yml $pastaInstallTraefik/dynamic/dynamic.yml
-sudo mv $pastaLog/composeTraefik.yaml $pastaInstallTraefik/compose.yaml
+sudo mv $pastaLog/portainer/composePortainer.yml $pastaInstallPortainer/compose.yml
+sudo mv $pastaLog/traefik/traefik.yml $pastaInstallTraefik/traefik.yml
+sudo mv $pastaLog/traefik/dynamic.yml $pastaInstallTraefik/dynamic/dynamic.yml
+sudo mv $pastaLog/traefik/composeTraefik.yml $pastaInstallTraefik/compose.yml
+
 
 # Definir permissões dos arquivos criados
-sudo chown -R root:docker $pastaInstallTraefik/acme/acme.json $pastaInstallPortainer/compose.yaml $pastaInstallTraefik/traefik.yml $pastaInstallTraefik/dynamic/dynamic.yml $pastaInstallTraefik/compose.yaml 2>$pastaLog/logInstallPortTraefik.txt
+sudo chown -R root:docker $pastaInstallTraefik/acme/acme.json $pastaInstallPortainer/compose.yml $pastaInstallTraefik/traefik.yml $pastaInstallTraefik/dynamic/dynamic.yml $pastaInstallTraefik/compose.yml 2>$pastaLog/logInstallPortTraefik.txt
 sudo chmod 600 $pastaInstallTraefik/acme/acme.json 2>$pastaLog/logInstallPortTraefik.txt
 
 echo "Arquivos de configuração inicial criados." 2>$pastaLog/logInstallPortTraefik.txt
@@ -198,11 +199,11 @@ docker network create traefik 2>$pastaLog/logInstallPortTraefik.txt
 echo "Rede Docker 'traefik' criada." 2>$pastaLog/logInstallPortTraefik.txt
 
 # Levantar o serviço Traefik
-docker compose -f $pastaInstallTraefik/compose.yaml up -d 2>$pastaLog/logInstallPortTraefik.txt
+docker compose -f $pastaInstallTraefik/compose.yml up -d 2>$pastaLog/logInstallPortTraefik.txt
 echo "Serviço Traefik iniciado." 2>$pastaLog/logInstallPortTraefik.txt  
 
 # Levantar o serviço Portainer
-docker compose -f $pastaInstallPortainer/compose.yaml up -d 2>$pastaLog/logInstallPortainer.txt
+docker compose -f $pastaInstallPortainer/compose.yml up -d 2>$pastaLog/logInstallPortainer.txt
 echo "Serviço Portainer iniciado." 2>$pastaLog/logInstallPortainer.txt
 echo "Instalação do Portainer e Traefik concluída com sucesso." 2>$pastaLog/logInstallPortainer.txt
 

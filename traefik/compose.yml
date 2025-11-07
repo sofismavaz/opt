@@ -1,0 +1,22 @@
+services:
+  traefik:
+    image: traefik:v3.5
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - traefik
+    environment:
+      - TRAEFIK_GLOBAL_SENDANONYMOUSUSAGE=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${pastaInstallTraefik}/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ${pastaInstallTraefik}/dynamic:/etc/traefik/dynamic:ro
+      - ${pastaInstallTraefik}/acme:/etc/traefik/acme
+      - ${pastaInstallTraefik}/logs:/var/log/traefik
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+networks:
+  traefik:
+    external: true

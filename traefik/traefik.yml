@@ -1,0 +1,46 @@
+api:
+  dashboard: true
+  insecure: true
+  debug: false
+entryPoints:
+  web:
+    address: ":80"
+    # redirect all HTTP to HTTPS
+    #http:
+     #redirections:
+      #  entryPoint:
+      #   to: websecure
+      #    scheme: https
+      #    permanent: true
+  websecure:
+    address: ":443"
+#serversTransport:
+#  insecureSkipVerify: true
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: traefik
+  file:
+    directory: "etc/traefik/dynamic"
+    watch: true
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      maxVersion: VersionTLS13
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+
+log:
+  level: INFO
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  format: json

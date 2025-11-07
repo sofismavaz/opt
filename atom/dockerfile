@@ -1,0 +1,58 @@
+# Dockerfile.AtoMWeb - Baseado na lógica de instalação da aplicação web (serviço 'atom')
+#
+# NOTA: Em um projeto real, você usaria uma imagem 'builder' para instalar dependências
+# (composer, npm) e, em seguida, uma imagem 'runtime' menor.
+
+# 1. Usar uma imagem base PHP-FPM com as bibliotecas necessárias para o AtoM
+# Baseado no script installAtoM.sh
+# Autor: Gerado por IA com base no script fornecido
+# Versão: 1.0
+# Data: 2024-11-04
+
+FROM php:8.2-fpm-bullseye
+
+LABEL maintainer="Gerado a partir da lógica de installAtoM.sh"
+
+# 2. Instalar dependências do sistema necessárias para o AtoM
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    libxml2-dev \
+    libpng-dev \
+    libzip-dev \
+    libicu-dev \
+    npm \
+    make \
+    # Limpar cache do apt
+    && rm -rf /var/lib/apt/lists/*
+
+# 3. Instalar extensões PHP (pdo_mysql, opcache, intl, zip são comuns para Symfony/AtoM)
+RUN docker-php-ext-install pdo_mysql opcache intl zip
+
+# 4. Definir o diretório de trabalho (baseado no volume do compose: ${pastaInstallAtoM}:/atom/src)
+ENV ATOM_SOURCE_DIR="/atom/src"
+WORKDIR ${ATOM_SOURCE_DIR}
+
+# 5. Copiar o código-fonte (No script original, o código é baixado com git clone)
+# Em um Dockerfile real, o código-fonte do AtoM seria copiado localmente:
+# COPY . ${ATOM_SOURCE_DIR}
+
+# 6. Configurar Variáveis de Ambiente (baseado no 'environment:' do compose.yaml do AtoM)
+ENV ATOM_DEVELOPMENT_MODE="on"
+ENV ATOM_ELASTICSEARCH_HOST="elasticsearch"
+ENV ATOM_MYSQL_DSN="mysql:host=percona;port=3306;dbname=atom;charset=utf8mb4"
+ENV ATOM_MYSQL_USERNAME="atom"
+ENV ATOM_MYSQL_PASSWORD="atom_12345"
+# ... (outras variáveis)
+
+# 7. Criar os diretórios de uploads/downloads (que seriam volumes montados)
+RUN mkdir -p /usr/share/nginx/atom/uploads \
+    /usr/share/nginx/atom/downloads \
+    /usr/share/nginx/atom/config \
+    /usr/share/nginx/atom/plugins \
+    && chown -R www-data:www-data /usr/share/nginx/atom
+
+# 8. Mudar o usuário para o de execução da aplicação
+USER www-data
+
+# 9. Comando de execução (inicia o serviço PHP-FPM)
+CMD ["php-fpm"]

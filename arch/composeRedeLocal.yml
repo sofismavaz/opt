@@ -1,0 +1,23 @@
+services:
+# inclusão dos serviços ao network rede_local
+  archivematica-mcp-client:    
+    networks:
+      - default
+      - traefik
+      - integracao
+
+  archivematica-dashboard:
+    networks:
+      - default
+      - traefik
+      - integracao
+
+# definição dos networks e volumes
+networks:
+  default:
+  traefik:
+    external:
+      name: traefik
+  integracao:
+    external:
+      name: integracao

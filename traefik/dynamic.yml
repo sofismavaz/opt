@@ -1,0 +1,19 @@
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:               # redireciona tudo p/ HTTPS (exceto ACME, Traefik cuida)
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "serede@tre-ac.jus.br"
+      storage: "./acme/acme.json"   # persista em volume
+      httpChallenge:
+        entryPoint: web            # desafio pela porta 80

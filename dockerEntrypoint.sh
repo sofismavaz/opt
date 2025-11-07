@@ -2,8 +2,8 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 #
 # Autor: Lucir Vaz 
-# Data: 2024-11-04
-# Versão: 1.5
+# Data: 2024-06-27
+# Versão: 1.0
 #
 # Instruções iniciais
 

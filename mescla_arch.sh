@@ -5,6 +5,15 @@
 # Lucir Vaz
 # data: 05/11/20026
 
+# Recebe pasta de destino da instalação como argumento
+pastaLog=$1
+if [ -z "$pastaLog" ]; then
+    pastaLog="${HOME}/archivematica"
+    mkdir -p $pastaLog
+fi
+
+pastaInstallArch="/opt/archivematica"
+
 # 1. Verificar a existência das ferramentas necessárias e dos arquivos.
 if ! command -v yq &> /dev/null
 then
@@ -13,7 +22,13 @@ then
     exit 1
 fi
 
-if [[ ! -f "compose.yml" || ! -f "compose_arch.yml" ]]
+# composeRedeLocal=$(yq e '.services.nginx.networks.rede_local' compose.yml 2>/dev/null)
+#
+composeRedeLocal="${pastaLog}/arch/composeRedeLocal.yml"
+composeOriginal="${pastaInstallArch}/hack/compose.yml"
+composeArch="${pastaLog}/compose_arch.yml"
+
+if [[ ! -f "$composeOriginal" || ! -f "$composeArch" ]]
 then
     echo "Erro: Os arquivos 'compose.yml' e/ou 'compose_arch.yml' não foram encontrados no diretório atual." >&2
     exit 1
@@ -22,7 +37,7 @@ fi
 OUTPUT_FILE="docker-compose.yml"
 TEMP_FILE="temp_merged.yml"
 
-echo "Iniciando a mesclagem de compose.yml e compose_arch.yml..."
+echo "Iniciando a mesclagem de ${composeOriginal} e ${composeArch}..."
 
 # O 'yq merge' irá mesclar os arquivos. 
 # Por padrão, ele sobrescreve chaves do primeiro arquivo com as do segundo.
@@ -47,12 +62,14 @@ echo "Iniciando a mesclagem de compose.yml e compose_arch.yml..."
 # A ferramenta 'yq' faz uma mesclagem profunda em listas e mapas, o que é ideal.
 # O segundo arquivo na linha de comando ('compose.yml') sobrescreve o primeiro ('compose_arch.yml') 
 # em caso de chaves duplicadas.
-yq eval-all '. as $item ireduce ({}; . * $item)' compose_arch.yml compose.yml > "$TEMP_FILE"
+yq eval-all '. as $item ireduce ({}; . * $item)' ${composeArch} ${composeOriginal} > "$TEMP_FILE"
 
 # O comando yq acima é uma forma segura de mesclagem recursiva.
-
 # Pós-processamento: Mudar o campo 'name' e garantir uma versão.
 yq '.name = "am_merged" | .version = "3.8"' "$TEMP_FILE" > "$OUTPUT_FILE"
+
+sudo mv "$composeOriginal" "$pastaLog/compose_original_backup.yml"
+sudo mv "$OUTPUT_FILE" "$composeOriginal"
 
 # Limpar arquivo temporário
 rm "$TEMP_FILE"

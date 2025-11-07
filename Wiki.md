@@ -7,11 +7,12 @@ Os scrips de configuração e instalação estão disponíveis no servidor git d
 
 ```shell
 git clone http://git.tre-ac.jus.br/lrocio/archivematica.git "${HOME}/archivematica"
-ou
+              ou
 git clone http://10.168.122.5/lrocio/archivematica.git "${HOME}/archivematica"
 ```
 
 A proposta de automação oferecerá um menu com diretivas de configuração e instalação das aplicações e com o perfil de usuário e *sessão (id) local*, executar o Script *preparaAmbiente.sh*
+
 ```shell
 $ chmod +x ${HOME}/archivematica/*.sh
 $ cd ${HOME}/archivematica
