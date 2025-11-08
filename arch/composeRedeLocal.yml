@@ -1,6 +1,29 @@
+# comando para inserir a interfaceRedeTraefik.yml ao arquivo docker-compose.yml e criar o arquivo compose_final.yml
+yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' interfaceRede.yml docker-compose.yml > compose.yml
+
+# Linhas de interface de rede a serem adicionadas ao arquivo compose do archivematica
 services:
-# inclusão dos serviços ao network rede_local
-  archivematica-mcp-client:    
+  mysql:
+    networks:
+      - default
+
+  elasticsearch:
+    networks:
+      - default
+      
+  gearmand:
+    networks:
+      - default
+
+  clamavd:
+    networks:
+      - default
+
+  archivematica-mcp-server:
+    networks:
+      - default
+
+  archivematica-mcp-client:
     networks:
       - default
       - traefik
@@ -11,6 +34,11 @@ services:
       - default
       - traefik
       - integracao
+
+  archivematica-storage-service:
+    networks:
+      - default
+      - traefik
 
 # definição dos networks e volumes
 networks:
