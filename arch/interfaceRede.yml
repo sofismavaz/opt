@@ -1,6 +1,3 @@
-# comando para inserir a interfaceRedeTraefik.yml ao arquivo docker-compose.yml e criar o arquivo compose_final.yml
-yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' interfaceRede.yml docker-compose.yml > compose.yml
-
 # Linhas de interface de rede a serem adicionadas ao arquivo compose do archivematica
 services:
   mysql:

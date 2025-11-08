@@ -51,7 +51,7 @@ git clone https://github.com/artefactual/archivematica.git --recurse-submodules 
 echo "Código do Archivematica baixado." 2>>$pastaLog/logInstallArchivematica.txt
 
 echo "Ajuste dos parâmetros de instalação do Archivematica..." 2>>$pastaLog/logInstallArchivematica.txt
-bash $pastaLog/mescla_arch.sh "${pastaLog}" 2>>$pastaLog/logInstallArchivematica.txt
+bash $pastaLog/arch/mescla_arch.sh "${pastaLog}" 2>>$pastaLog/logInstallArchivematica.txt
 echo "Arquivos Docker Compose mesclados." 2>>$pastaLog/logInstallArchivematica.txt
 
 # Adicionar usuário ao grupo docker
@@ -75,12 +75,12 @@ git submodule update --init --recursive
 # Criação dos volumes
 cd $pastaInstallArchivematica/hack
 make create-volumes
-make build
+docker build
 echo "Volumes do Archivematica criados." 2>>$pastaLog/logInstallArchivematica.txt
 
 # Criar arquivo docker-compose.yaml do Archivematica
 cd $pastaInstallArchivematica/hack
-make docker-compose.yml
+docker compose up -d
 echo "Arquivo docker-compose.yml do Archivematica criado." 2>$pastaLog/logInstallArchivematica.txt
 
 # Subir os containeres
