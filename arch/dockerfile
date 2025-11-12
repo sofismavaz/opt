@@ -1,0 +1,40 @@
+# Claro! Aqui está um exemplo de um Dockerfile que atende aos requisitos que você especificou:
+
+FROM ubuntu:22.04
+
+# 1. Instala dependências básicas
+RUN apt-get update && apt-get install -y \
+    git \
+    sudo \
+    curl \
+    sysctl \
+    docker-compose \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. Cria o usuário 'archivematica'
+RUN useradd -m -s /bin/bash archivematica
+
+# 3. Clona o repositório na pasta /opt/archivematica
+RUN git clone --recurse-submodules https://github.com/artefactual/archivematica.git /opt/archivematica
+
+# 4. Define a versão desejada
+WORKDIR /opt/archivematica
+RUN git fetch --all && git checkout v1.18.0
+
+# 5. Copia o arquivo docker-compose da pasta local ./arc/compose.yml
+# Supondo que o arquivo esteja no mesmo diretório do Dockerfile
+COPY ./arc/compose.yml /opt/archivematica/docker-compose.yml
+
+# 6. Executa o comando sysctl
+RUN sysctl -w vm.max_map_count=262144 || true
+
+# Define o usuário padrão
+USER archivematica
+
+# Diretório de trabalho
+WORKDIR /opt/archivematica
+
+// Observações:
+// O comando sysctl pode não funcionar diretamente em ambientes Docker baseados em containers, pois depende de permissões do host. Para garantir que o valor seja aplicado corretamente, você pode definir isso no host ou usar docker run com --sysctl vm.max_map_count=262144.
+// Certifique-se de que o arquivo compose.yml esteja disponível no caminho ./arc/compose.yml relativo ao Dockerfile.
+// Se quiser, posso te ajudar a montar o docker-compose.yml também ou configurar o ambiente para rodar o Archivematica. Deseja seguir por esse caminho?
