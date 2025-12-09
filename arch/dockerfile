@@ -23,7 +23,7 @@ RUN git fetch --all && git checkout v1.18.0
 
 # 5. Copia o arquivo docker-compose da pasta local ./arc/compose.yml
 # Supondo que o arquivo esteja no mesmo diretório do Dockerfile
-COPY ./arc/compose.yml /opt/archivematica/docker-compose.yml
+COPY ./arch/compose.yml /opt/archivematica/docker-compose.yml
 
 # 6. Executa o comando sysctl
 RUN sysctl -w vm.max_map_count=262144 || true
